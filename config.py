@@ -1,7 +1,7 @@
 import yaml
 import json
 from openai import OpenAI
-
+import os
 
 class AppConfig:
     def __init__(self, config_file='config.yaml', secrets_file='secrets.json'):
@@ -20,8 +20,18 @@ class AppConfig:
         self.character = self.config['characters']['alan']
         self.character_description = self.construct_character_description()
 
-        self.openai_key = self.secrets['openai_key']
+        # Use an environment variable for the OpenAI key
+        self.openai_key = os.getenv('OPENAI_KEY')
+        if not self.openai_key:
+            raise ValueError(
+                "OPENAI_KEY environment variable not set. "
+                "To set it:\n"
+                "- On macOS or Linux, use: export OPENAI_KEY=\"your_openai_key_here\"\n"
+                "- On Windows (PowerShell), use: $env:OPENAI_KEY=\"your_openai_key_here\""
+                "\nReplace 'your_openai_key_here' with your actual OpenAI API key."
+            )
         self.client = OpenAI(api_key=self.openai_key)
+
 
         if self.event['effects'] is None:
             self.event['effects'] = self.get_dynamic_effects()
