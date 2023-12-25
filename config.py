@@ -61,8 +61,7 @@ class AppConfig:
                                                                "content": "You are a helpful, factual, and highly specific assistant."},
                                                               {"role": "user",
                                                                "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {self.event['name'].lower()} on this person. 
-                     Be very specific and very realistic.The effects can be related to any aspect of the person---their personality, demographics, location, etc. 
-                     Be highly specific. 
+                     Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic and specific. Do not exaggerate.
                     DESCRIPTION:
                     {self.character_description}"""}],
                                                           temperature=0.6, max_tokens=250, top_p=1)
