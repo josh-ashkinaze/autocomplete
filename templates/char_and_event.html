@@ -5,43 +5,51 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <div class="container mt-5">
         <h2>Create Your Character and Event</h2>
-        <form method="post" action="{{ url_for('char_and_event') }}" novalidate>
-            {{ character_form.hidden_tag() }}  <!-- CSRF token for character form -->
-            {{ event_form.hidden_tag() }}  <!-- CSRF token for event form -->
+        <form method="post" action="{{ url_for('char_and_event') }}" novalidate class="mt-4">
+            {{ character_form.hidden_tag() }}
+            {{ event_form.hidden_tag() }}
 
-            <h3>Character Information</h3>
-            {% for field in character_form %}
-                <div class="form-group">
-                    {{ field.label(class="form-control-label") }}
-                    {{ field(class="form-control") }}
-                    {% if field.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in field.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h3 class="card-title">Character Information</h3>
+                    {% for field in character_form %}
+                        <div class="form-group">
+                            {{ field.label(class="form-control-label") }}
+                            {{ field(class="form-control", placeholder=field.label.text) }}
+                            {% if field.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in field.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
-            {% endfor %}
+            </div>
 
-            <h3>Event Name</h3>
-            <div class="form-group">
-                {{ event_form.event_name.label(class="form-control-label") }}
-                {{ event_form.event_name(class="form-control") }}
-                {% if event_form.event_name.errors %}
-                    <div class="invalid-feedback">
-                        {% for error in event_form.event_name.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Event Name</h3>
+                    <div class="form-group">
+                        {{ event_form.event_name.label(class="form-control-label") }}
+                        {{ event_form.event_name(class="form-control", placeholder=event_form.event_name.label.text) }}
+                        {% if event_form.event_name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in event_form.event_name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                {% endif %}
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary">Create</button>
         </form>
     </div>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

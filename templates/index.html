@@ -40,97 +40,83 @@
     <div contenteditable="true" id="editor" class="form-control"></div>
 
 <script>
-
-    function sanitizeText(text) {
-    var div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-
     $(document).ready(function () {
         var editor = $('#editor');
         var originalText = '';
         var suggestion = '';
-        var suggestionAccepted = false; // Flag to indicate if the suggestion was accepted
+        var suggestionAccepted = false;
 
-        // Function to check if the last character is not a punctuation followed by a space
         function isMiddleOfSentence(text) {
             return !/[\.\?\!\:\;]\s$/.test(text);
-
         }
 
-        // Create a debounced version of the triggerAutocomplete function
+        function countSentences(text) {
+            return (text.match(/[.!?]/g) || []).length;
+        }
+
         var debouncedAutocomplete = _.debounce(function () {
-            if (isMiddleOfSentence(originalText)) {
+            if (isMiddleOfSentence(originalText) && countSentences(originalText) >= 2) {
                 triggerAutocomplete();
             }
         }, 700);
 
-        // Event handler for input changes in the editor
+        function updateEditorText() {
+            editor.text(originalText);
+            if (suggestion && suggestion !== 'None') {
+                var suggestionElement = $('<span>').addClass('suggestion').text(suggestion);
+                editor.append(suggestionElement);
+            }
+            placeCaretAtEnd(editor.get(0));
+        }
+
         editor.on('input', function () {
-            var rawText = $(this).text();
-            originalText = rawText; // Sanitize the text
+            originalText = $(this).text();
             debouncedAutocomplete();
         });
 
-        // Function to trigger the autocomplete process
         function triggerAutocomplete() {
-            // AJAX request to the server for autocomplete suggestions
             $.ajax({
                 url: '/autocomplete',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ text: originalText }),
                 success: function(response) {
-                    suggestion = response.completion;
-                    var suggestionHTML = originalText + '<span class="suggestion">' + suggestion + '</span>';
-                    $('#editor').html(suggestionHTML);
-                    placeCaretAtEnd(document.getElementById('editor'));
-                    suggestionAccepted = false; // Reset the flag after successful autocomplete
+                    suggestion = response.completion || '';
+                    updateEditorText();
+                    suggestionAccepted = false;
                 },
                 error: function(xhr, status, error) {
                     console.error("Autocomplete error:", status, error);
+                    suggestion = ''; // Clear suggestion on error
+                    updateEditorText();
                 }
             });
         }
 
-        // Event handler for keydown events in the editor
         editor.on('keydown', function(e) {
-            if (e.keyCode === 9) {  // Tab key for accepting suggestion
+            if (e.keyCode === 9 && suggestion) {  // Tab key
                 e.preventDefault();
-                if (suggestion) {
-                    $(this).html(originalText + suggestion);
-                    placeCaretAtEnd(document.getElementById('editor'));
-                    suggestion = '';
-                    suggestionAccepted = true; // Mark suggestion as accepted
-                }
-            } else {
-                // For any other key, reset the suggestion and accepted flag
-                if (!suggestionAccepted) {
-                    $(this).html(originalText);
-                    placeCaretAtEnd(document.getElementById('editor'));
-                    suggestion = '';
-                }
-                suggestionAccepted = false;
+                originalText += suggestion;
+                suggestion = '';
+                updateEditorText();
+                suggestionAccepted = true;
+            } else if (!suggestionAccepted) {
+                suggestion = ''; // Clear suggestion on other key presses
             }
         });
 
-        // Function to place the caret at the end of the editor content
         function placeCaretAtEnd(el) {
             el.focus();
-            if (typeof window.getSelection != "undefined"
-                && typeof document.createRange != "undefined") {
-                var range = document.createRange();
-                range.selectNodeContents(el);
-                range.collapse(false);
-                var sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
+            var range = document.createRange();
+            range.selectNodeContents(el);
+            range.collapse(false);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
         }
     });
 </script>
+
 
 
 
