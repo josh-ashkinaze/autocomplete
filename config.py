@@ -80,5 +80,3 @@ class AppConfig:
                 print(e)
                 # Corrected recursive call here
                 return self.get_dynamic_effects(attempt_no + 1, max_attempts)
-
-a = AppConfig()
