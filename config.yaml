@@ -1,0 +1,22 @@
+openai:
+  model: "gpt-3.5-turbo"
+  temperature_min: 0.8
+  temperature_max: 0.9
+  max_tokens_min: 10
+  max_tokens_max: 15
+  top_p: 1
+  max_attempts: 2
+
+characters:
+  eliana:
+    name: "Eliana"
+    age: 23
+    gender: "Female"
+    occupation: "College Student"
+    location: "Vermont"
+    hobbies: ["Watching baseball", "listening to maccabeats", "eating nutella"]
+    personality: "Introverted, quirky"
+
+event:
+  name: "Got Long Covid"
+  effects:
