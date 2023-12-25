@@ -28,6 +28,7 @@
         var editor = $('#editor');
         var originalText = '';
         var suggestion = '';
+        var suggestionAccepted = false; // Flag to track if suggestion was accepted
 
         // Debounced version of the triggerAutocomplete function
         var debouncedAutocomplete = _.debounce(function () {
@@ -39,35 +40,44 @@
             debouncedAutocomplete();
         });
 
-       function triggerAutocomplete() {
-    $.ajax({
-        url: '/autocomplete',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ text: originalText }),
-        success: function(response) {
-            suggestion = response.completion;
-            var suggestionHTML = originalText + '<span class="suggestion" aria-label="Autocomplete suggestion">' + suggestion + '</span>';
-            $('#editor').html(suggestionHTML);
-            placeCaretAtEnd(document.getElementById('editor'));
-        },
-        error: function(xhr, status, error) {
-            console.error("Autocomplete error:", status, error);
+        function triggerAutocomplete() {
+            $.ajax({
+                url: '/autocomplete',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ text: originalText }),
+                success: function(response) {
+                    suggestion = response.completion;
+                    var suggestionHTML = originalText + '<span class="suggestion" aria-label="Autocomplete suggestion">' + suggestion + '</span>';
+                    $('#editor').html(suggestionHTML);
+                    placeCaretAtEnd(document.getElementById('editor'));
+                    suggestionAccepted = false; // Reset the flag on successful autocomplete
+                },
+                error: function(xhr, status, error) {
+                    console.error("Autocomplete error:", status, error);
+                }
+            });
         }
-    });
-}
 
         editor.on('keydown', function(e) {
-    if (e.keyCode === 9) {  // Tab key
-        e.preventDefault();
-        if (suggestion) {
-            $(this).html(originalText + suggestion);
-            placeCaretAtEnd(document.getElementById('editor'));
-        }
-    } else {
-        suggestion = ''; // Clear the suggestion
-    }
-});
+            if (e.keyCode === 9) {  // Tab key
+                e.preventDefault();
+                if (suggestion) {
+                    $(this).html(originalText + suggestion);
+                    placeCaretAtEnd(document.getElementById('editor'));
+                    suggestion = '';
+                    suggestionAccepted = true; // Set flag as suggestion is accepted
+                }
+            } else {
+                if (!suggestionAccepted) {
+                    // Remove the suggestion span if suggestion was not just accepted
+                    $(this).html(originalText);
+                    placeCaretAtEnd(document.getElementById('editor'));
+                    suggestion = '';
+                }
+                suggestionAccepted = false; // Reset the flag for any key press other than Tab
+            }
+        });
 
         function placeCaretAtEnd(el) {
             el.focus();
@@ -83,6 +93,7 @@
         }
     });
 </script>
+
 
 </body>
 </html>
