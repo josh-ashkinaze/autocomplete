@@ -1,9 +1,10 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html>
 <head>
     <title>Text Editor with GPT Autocomplete</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.19/lodash.min.js"></script>
+
     <style>
         #editor {
             width: 100%;
@@ -13,64 +14,70 @@
             font-size: 16px;
             font-family: 'Arial', sans-serif;
         }
+
         .suggestion {
             color: grey;
         }
     </style>
 </head>
 <body>
-    <div contenteditable="true" id="editor"></div>
+<div contenteditable="true" id="editor"></div>
 
-    <script>
-        $(document).ready(function() {
-            var editor = $('#editor');
-            var originalText = '';
-            var suggestion = '';
+<script>
+    $(document).ready(function () {
+        var editor = $('#editor');
+        var originalText = '';
+        var suggestion = '';
 
-            editor.on('input', function() {
-                originalText = $(this).text();
-            });
+        // Debounced version of the triggerAutocomplete function
+        var debouncedAutocomplete = _.debounce(function () {
+            triggerAutocomplete();
+        }, 500);
 
-            editor.on('keydown', function(e) {
-                if (e.keyCode === 9) {  // Tab key
-                    e.preventDefault();
-                    if (suggestion) {
-                        $(this).html(originalText + suggestion);
-                        placeCaretAtEnd(document.getElementById('editor'));
-                        suggestion = '';
-                    }
+        editor.on('input', function () {
+            originalText = $(this).text();
+            debouncedAutocomplete();
+        });
+
+        function triggerAutocomplete() {
+            $.ajax({
+                url: '/autocomplete',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({text: originalText}),
+                success: function (response) {
+                    suggestion = response.completion;
+                    $('#editor').html(originalText + '<span class="suggestion">' + suggestion + '</span>');
+                    placeCaretAtEnd(document.getElementById('editor'));
                 }
             });
+        }
 
-            editor.on('keyup', function(e) {
-                if (e.keyCode !== 9) {  // not Tab key
-                    $.ajax({
-                        url: '/autocomplete',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ text: originalText }),
-                        success: function(response) {
-                            suggestion = response.completion;
-                            $('#editor').html(originalText + '<span class="suggestion">' + suggestion + '</span>');
-                            placeCaretAtEnd(document.getElementById('editor'));
-                        }
-                    });
-                }
-            });
-
-            function placeCaretAtEnd(el) {
-                el.focus();
-                if (typeof window.getSelection != "undefined"
-                        && typeof document.createRange != "undefined") {
-                    var range = document.createRange();
-                    range.selectNodeContents(el);
-                    range.collapse(false);
-                    var sel = window.getSelection();
-                    sel.removeAllRanges();
-                    sel.addRange(range);
+        editor.on('keydown', function (e) {
+            if (e.keyCode === 9) {  // Tab key
+                e.preventDefault();
+                if (suggestion) {
+                    $(this).html(originalText + suggestion);
+                    placeCaretAtEnd(document.getElementById('editor'));
+                    suggestion = '';
                 }
             }
         });
-    </script>
+
+        function placeCaretAtEnd(el) {
+            el.focus();
+            if (typeof window.getSelection != "undefined"
+                && typeof document.createRange != "undefined") {
+                var range = document.createRange();
+                range.selectNodeContents(el);
+                range.collapse(false);
+                var sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
+    });
+</script>
+
 </body>
 </html>
