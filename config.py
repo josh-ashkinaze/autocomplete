@@ -3,10 +3,11 @@ import json
 from openai import OpenAI
 import os
 
+
 class AppConfig:
-    def __init__(self, config_file='config.yaml', secrets_file='secrets.json'):
+    def __init__(self, config_file='config.yaml'):
         self.config = self.load_yaml_config(config_file)
-        self.secrets = self.load_json_config(secrets_file)
+        self.hardcoded = self.config['hardcode_character_and_event']
 
         # OpenAI settings
         self.model = self.config['openai']['model']
@@ -14,11 +15,15 @@ class AppConfig:
         self.token_range = (self.config['openai']['max_tokens_min'], self.config['openai']['max_tokens_max'])
         self.top_p = self.config['openai']['top_p']
         self.max_attempts = self.config['openai']['max_attempts']
-        self.event = self.config['event']
 
-        # ToDo: make this dynamic
-        self.character = self.config['characters']['alan']
-        self.character_description = self.construct_character_description()
+        # ToDo: These are now depracated because we have the user enter this stuff manually.
+        if self.hardcoded:
+            self.event = self.config['event']
+            self.character = self.config['characters']['alan']
+            self.character_description = self.construct_character_description()
+            self.event_description = self.get_dynamic_effects()
+        else:
+            pass
 
         # Use an environment variable for the OpenAI key
         self.openai_key = os.getenv('OPENAI_KEY')
@@ -31,22 +36,12 @@ class AppConfig:
                 "\nReplace 'your_openai_key_here' with your actual OpenAI API key."
             )
         self.client = OpenAI(api_key=self.openai_key)
-
-
-        if self.event['effects'] is None:
-            self.event['effects'] = self.get_dynamic_effects()
-        else:
-            self.event['effects'] = self.config['event']['effects']
+        self.flask_secret_key = os.getenv('FLASK_SECRET_KEY')
 
     def load_yaml_config(self, filepath):
         """ Load configuration from a YAML file. """
         with open(filepath, 'r') as ymlfile:
             return yaml.safe_load(ymlfile)
-
-    def load_json_config(self, filepath):
-        """ Load configuration from a JSON file. """
-        with open(filepath) as jsonfile:
-            return json.load(jsonfile)
 
     def construct_character_description(self):
         # ToDo: make this dynamic
@@ -70,9 +65,9 @@ class AppConfig:
                                                                "content": "You are a helpful, factual, and highly specific assistant."},
                                                               {"role": "user",
                                                                "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {self.event['name'].lower()} on this person. 
-                     Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic and specific. Do not exaggerate.
-                    DESCRIPTION:
-                    {self.character_description}"""}],
+                         Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic and specific. Do not exaggerate.
+                        DESCRIPTION:
+                        {self.character_description}"""}],
                                                           temperature=0.6, max_tokens=250, top_p=1)
                 answer = json.loads(response.choices[0].json())['message']['content']
                 return answer

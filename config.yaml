@@ -1,8 +1,10 @@
+hardcode_character_and_event: true
+
 openai:
   model: "gpt-3.5-turbo"
   temperature_min: 0.8
   temperature_max: 0.9
-  max_tokens_min: 10
+  max_tokens_min: 5
   max_tokens_max: 15
   top_p: 1
   max_attempts: 2
@@ -19,13 +21,13 @@ characters:
 
   alan:
     name: "alan"
-    age: 63
+    age: 64
     gender: "Male"
-    occupation: "Semi retired lawyer"
-    location: "Oradell NJ"
-    hobbies: [ "Pickleball", "Peleton", "Tennis", "Trying to meet famous politicans" ]
-    personality: "Grumpy, quick to anger"
+    occupation: "Semi Retried Lawyer"
+    location: "New Jersey"
+    hobbies: ["Tennis", "pickleball", "barking"]
+    personality: "Unreflective, talkative"
 
 event:
-  name: "Got Long Covid"
+  name: "Unemployment"
   effects:

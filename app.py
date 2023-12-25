@@ -6,16 +6,61 @@ Description: This file contains the main Flask app that handles the autocomplete
 the app autocompletes the user's response as if this specific user experienced a specific event.
 """
 
-from flask import Flask, request, render_template, jsonify
 from config import AppConfig
 import json
 import string
 import random
 import re
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from forms import CharacterForm, EventForm
+
 
 app = Flask(__name__)
 app_config = AppConfig()
+app.config['SECRET_KEY'] = app_config.flask_secret_key
 
+
+@app.route('/')
+def initial():
+    """Redirect to character and event creation page."""
+    if not app_config.hardcoded:
+        # Ask for character and event from user
+        return redirect(url_for('char_and_event'))
+    else:
+        # Read this stuff from YAML file
+        session['character_description'] = app_config.character_description
+        session['event_name'] = app_config.event
+        session['event_description'] = app_config.event_description
+        return redirect(url_for('index'))
+
+@app.route('/index')
+def index():
+    return render_template('index.html')
+
+@app.route('/autocomplete', methods=['GET', 'POST'])
+def autocomplete():
+    """ Handle the autocomplete request. """
+    text = normalize_spacing(request.json.get('text'))
+    context, incomplete_sentence = get_context_and_incomplete_sentence(normalize_spacing(text))
+    context, incomplete_sentence = normalize_spacing(context), normalize_spacing(incomplete_sentence)
+
+    completion = normalize_spacing(get_chat_completion(
+        character_description=session['character_description'],
+        event=session['event_name'],
+        event_effects=session['event_description'],
+        model=app_config.model,
+        context=context,
+        incomplete_sentence=incomplete_sentence,
+        temperature=random.uniform(*app_config.temperature_range),
+        max_tokens=random.randint(*app_config.token_range),
+        top_p=app_config.top_p)
+    )
+    # Make sure LLM didn't stop mid-word
+    full_word_completion = normalize_spacing(extract_complete_words(completion))
+    de_duped_completion = normalize_spacing(remove_duplicated_completion(incomplete_sentence, full_word_completion))
+    d = {'text': text, 'context': context, 'incomplete_sentence': incomplete_sentence, 'completion': completion, 'full_word_completion': full_word_completion, 'de_duped_completion': de_duped_completion}
+    #print(d)
+    return jsonify(completion=de_duped_completion)
 
 def get_chat_completion(character_description,
                         event,
@@ -50,68 +95,123 @@ def get_chat_completion(character_description,
                 top_p=top_p
             )
             answer = json.loads(response.choices[0].json())['message']['content']
+            answer = answer.replace("INCOMPLETE SENTENCE:", "")
+            answer = answer.replace("INCOMPLETE SENTENCE: ", "")
+
             return answer
         except Exception as e:
             print(e)
             return get_chat_completion(context=context, incomplete_sentence=incomplete_sentence, model=model,
                                        attempt_no=attempt_no + 1, max_attempts=2)
+############################################################
+# HANDLE CHARACTER CREATION
+############################################################
+@app.route('/char_and_event', methods=['GET', 'POST'])
+def char_and_event():
+    character_form = CharacterForm()
+    event_form = EventForm()
+
+    if request.method == 'POST':
+        if character_form.validate_on_submit() and event_form.validate_on_submit():
+            session['character_description'] = construct_character_description(character_form)
+            session['event_name'] = event_form.event_name.data
+            session['event_description'] = get_dynamic_effects(session['character_description'], session['event_name'])
+            flash('Character and event created successfully!', 'success')
+            return redirect(url_for('index'))  # Redirect to the index route
+        else:
+            flash('Please correct the errors in the form.', 'error')
+
+    return render_template('char_and_event.html', character_form=character_form, event_form=event_form)
+
+def get_dynamic_effects(character_description, event_description, attempt_no=0, max_attempts=2):
+        if attempt_no > max_attempts:
+            return None
+        else:
+            try:
+                client = app_config.client
+                response = client.chat.completions.create(model="gpt-3.5-turbo",
+                                                          messages=[
+                                                              {"role": "system",
+                                                               "content": "You are a helpful, factual, and highly specific assistant."},
+                                                              {"role": "user",
+                                                               "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {event_description} on this person. 
+                     Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic and specific. Do not exaggerate.
+                    DESCRIPTION:
+                    {character_description}"""}],
+                                                          temperature=0.6, max_tokens=250, top_p=1)
+                answer = json.loads(response.choices[0].json())['message']['content']
+                return answer
+            except Exception as e:
+                print(e)
+                return get_dynamic_effects(character_description, event_description, attempt_no + 1, max_attempts)
 
 
-@app.route('/')
-def index():
-    return render_template('index.html')
 
-
-@app.route('/autocomplete', methods=['POST'])
-def autocomplete():
-    """ Handle the autocomplete request. """
-    text = request.json.get('text')
-    context, incomplete_sentence = get_context_and_incomplete_sentence(text)
-    completion = get_chat_completion(
-        character_description=app_config.character_description,
-        event=app_config.event['name'],
-        event_effects=app_config.event['effects'],
-        model=app_config.model,
-        context=context,
-        incomplete_sentence=incomplete_sentence,
-        temperature=random.uniform(*app_config.temperature_range),
-        max_tokens=random.randint(*app_config.token_range),
-        top_p=app_config.top_p
-    )
-    # Make sure LLM didn't stop mid-word
-    full_word_completion = extract_complete_words(completion)
-    de_duped_completion = remove_duplicated_completion(context, full_word_completion)
-    print("TEXT:", text)
-    print("CONTEXT:", context)
-    print("INCOMPLETE SENTENCE:", incomplete_sentence)
-    print("COMPLETION:", completion)
-    print("FULL WORD COMPLETION:", full_word_completion)
-    print("REMOVE DUPLICATED COMPLETION:", de_duped_completion)
-    return jsonify(completion=de_duped_completion)
+def construct_character_description(form):
+    return f"{form.name.data}, a {form.age.data}-year-old {form.gender.data.lower()} from {form.location.data}, working as a {form.occupation.data}, with hobbies including {form.hobbies.data}. Known for being {form.personality.data}."
 
 
 ############################################################
-# HELPER FUNCTIONS #
+# HELPER FUNCTIONS FOR PROCESSING TEXT
 ############################################################
-def remove_duplicated_completion(text, completion):
+def remove_duplicated_completion(incomplete_sentence, completion):
     """
-    Sometimes the completion includes parts of the sentence it was supposed to complete,
-    so this function returns the completion removing any duplicated parts.
+    Sometimes the LLM returns a completion that is a duplicate of the incomplete sentence. This function removes that duplication.
     """
-    if not text or not completion:
-        return completion
+    if not incomplete_sentence or not completion:
+        return None
 
+    incomplete_sentence = normalize_spacing(incomplete_sentence.strip())
+    completion = normalize_spacing(completion.strip())
+
+    # Case 1: Starts With Overlap
+    # Incomplete sentence = But
+    # Completion = But I want to go
+    # Desired Completion = I want to go to
+    # Solution: Strip from the length of incomplete sentence onwards
+    if completion.startswith(incomplete_sentence):
+        # Remove the length of the incomplete sentence plus any trailing space
+        return completion[len(incomplete_sentence):].lstrip()
+
+    # Case 2: Total Overlap But Non-Starting
+    # Incomplete sentence = But I went to the mall
+    # Completion = went to the mall
+    # Desired Completion = None
+    # Solution: Check if the start of incomplete_sentence is the same as the completion
+    elif incomplete_sentence[:len(completion)] == completion:
+        return None
+
+    else:
+        overlap_len = 0
+        for i in range(len(incomplete_sentence)):
+            if completion.startswith(incomplete_sentence[i:]):
+                overlap_len = len(incomplete_sentence) - i
+                break
+
+        # Case 3: Non Direct Overlap
+        # Incomplete sentence = I just want to go
+        # Completion = just want to go to the store
+        # Desired Completion = to the store
+        # Solution: Remove the length of the overlap plus trailing space
+        if overlap_len > 0:
+            print("Case2")
+            return completion[overlap_len:].strip()
+
+        # Case 4: No Overlap
+        # Incomplete sentence = Now I spend my days
+        # Completion = playing guitar
+        # Desired Completion = playing guitar
+        else:
+            return completion
+
+
+def normalize_spacing(text):
+    if text is None:
+        return None
+    text = text.replace(u'\xa0', ' ').replace('\t', ' ')
+    text = re.sub(r'\s+', ' ', text)
     text = text.strip()
-    completion = completion.strip()
-
-    # Find the shortest possible overlap
-    overlap = ""
-    for i in range(1, min(len(text), len(completion)) + 1):
-        if text.endswith(completion[:i]):
-            overlap = completion[:i]
-
-    # Remove the overlapping part from the completion
-    return completion[len(overlap):]
+    return text
 
 
 def get_context_and_incomplete_sentence(text):

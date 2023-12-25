@@ -65,12 +65,12 @@
             if (isMiddleOfSentence(originalText)) {
                 triggerAutocomplete();
             }
-        }, 500);
+        }, 700);
 
         // Event handler for input changes in the editor
         editor.on('input', function () {
             var rawText = $(this).text();
-            originalText = sanitizeText(rawText); // Sanitize the text
+            originalText = rawText; // Sanitize the text
             debouncedAutocomplete();
         });
 

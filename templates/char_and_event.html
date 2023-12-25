@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Character and Event Creation</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2>Create Your Character and Event</h2>
+        <form method="post" action="{{ url_for('char_and_event') }}" novalidate>
+            {{ character_form.hidden_tag() }}  <!-- CSRF token for character form -->
+            {{ event_form.hidden_tag() }}  <!-- CSRF token for event form -->
+
+            <h3>Character Information</h3>
+            {% for field in character_form %}
+                <div class="form-group">
+                    {{ field.label(class="form-control-label") }}
+                    {{ field(class="form-control") }}
+                    {% if field.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in field.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <h3>Event Name</h3>
+            <div class="form-group">
+                {{ event_form.event_name.label(class="form-control-label") }}
+                {{ event_form.event_name(class="form-control") }}
+                {% if event_form.event_name.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in event_form.event_name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
