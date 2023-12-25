@@ -23,11 +23,11 @@ def get_chat_completion(context, incomplete_sentence, model="gpt-3.5-turbo", att
         messages=[
           {
             "role": "system",
-              "content": f"INSTRUCTIONS: You will autocomplete a user's sentence, writing in the first person. I will provide you with CONTEXT and an INCOMPLETE SENTENCE and you will return the COMPLETED SENTENCE that is consistent with CONTEXT. Write in the first person."
+              "content": f"INSTRUCTIONS\nWrite in the first person. You will autocomplete a character's sentence, as that character, writing in the first person. Adopt the character's characteristics, beliefs, attitudes, idioms, slang, ways of speaking, and general language style. When I provide you with CONTEXT and an INCOMPLETE SENTENCE, you will return the COMPLETED SENTENCE that is consistent with CONTEXT and the user's character. Write in the first person."
           },
           {
             "role": "user",
-            "content": f"CONTEXT:{context}\nINCOMPLETE SENTENCE:{incomplete_sentence}"
+            "content": f"\nCHARACTER:\nA 25 year old very Italian guido from New Jersey who lives the Yankees and Israel.\nCONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"
           }
         ],
         temperature=random.uniform(0.8, 0.9),
@@ -85,20 +85,26 @@ def remove_duplicated_completion(text, completion):
     Removes the duplicated part from the beginning of the completion
     if it overlaps with the end of the text.
     """
+    # In case of some kind of error
     if not text or not completion:
-        return completion
+        return ''
 
-    text_words = text.split()
-    completion_words = completion.split()
+    # Remove the duplicated part from the beginning of the completion
+    if completion.startswith(text):
+        return completion.split(text)[-1]
 
-    # Find the overlapping length
-    overlap_len = 0
-    for i in range(1, min(len(text_words), len(completion_words)) + 1):
-        if text_words[-i:] == completion_words[:i]:
-            overlap_len = i
-
-    # Remove the overlapping part from the completion
-    return ' '.join(completion_words[overlap_len:])
+    # In some cases the prior sentence contains a comma, colon, or semicolon and this
+    # is removed by the LLM. In this case, we need to remove the punctuation from the
+    # text as well.
+    # EX:
+    # >> text = "And here's the thing: "
+    # >> completion = "And here's the thing, I don't remember."
+    # >> Desired completion: "I don't remember"
+    # Need to strip `text` of puncuation so we recognize it as duplication.
+    else:
+        if text[-1] in [',', ':', ';']:
+            text = text[:-1]
+        return completion.split(text)[-1]
 
 
 def get_context_and_incomplete_sentence(text):
