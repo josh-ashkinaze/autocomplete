@@ -21,7 +21,7 @@ def get_chat_completion(prompt, model="gpt-3.5-turbo", attempt_no=0, max_attempt
         messages=[
           {
             "role": "system",
-            "content": "Given a sentence, you will auto-complete a user's sentence to make it in the style of a New Jersey italian. Be very Italian. "
+            "content": "Given a sentence, you will auto-complete a user's sentence to make it in the style of a New Jersey italian. Be very Italian. Make sure the sentence fits with what the user wrote before. "
                        "Return the rest of the sentence with a period at the end."
 
           },
@@ -30,8 +30,8 @@ def get_chat_completion(prompt, model="gpt-3.5-turbo", attempt_no=0, max_attempt
             "content": prompt
           }
         ],
-        temperature=1,
-        max_tokens=10,
+        temperature=0.8,
+        max_tokens=20,
         top_p=1
       )
       answer = json.loads(response.choices[0].json())['message']['content']
