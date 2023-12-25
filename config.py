@@ -16,13 +16,13 @@ class AppConfig:
         self.top_p = self.config['openai']['top_p']
         self.max_attempts = self.config['openai']['max_attempts']
 
-        # ToDo: These are now depracated because we have the user enter this stuff manually.
         if self.hardcoded:
             self.event = self.config['event']
             self.character = self.config['characters']['alan']
             self.character_description = self.construct_character_description()
             self.event_description = self.get_dynamic_effects()
         else:
+            raise NotImplementedError("Dynamic character and event creation is WIP")
             pass
 
         # Use an environment variable for the OpenAI key
