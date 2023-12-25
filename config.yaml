@@ -9,13 +9,22 @@ openai:
 
 characters:
   eliana:
-    name: "Eliana"
+    name: "eliana"
     age: 23
     gender: "Female"
     occupation: "College Student"
     location: "Vermont"
     hobbies: ["Watching baseball", "listening to maccabeats", "eating nutella"]
     personality: "Introverted, quirky"
+
+  alan:
+    name: "alan"
+    age: 63
+    gender: "Male"
+    occupation: "Semi retired lawyer"
+    location: "Oradell NJ"
+    hobbies: [ "Pickleball", "Peleton", "Tennis", "Trying to meet famous politicans" ]
+    personality: "Grumpy, quick to anger"
 
 event:
   name: "Got Long Covid"

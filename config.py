@@ -17,7 +17,7 @@ class AppConfig:
         self.event = self.config['event']
 
         # ToDo: make this dynamic
-        self.character = self.config['characters']['eliana']
+        self.character = self.config['characters']['alan']
         self.character_description = self.construct_character_description()
 
         self.openai_key = self.secrets['openai_key']
