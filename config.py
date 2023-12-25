@@ -1,4 +1,3 @@
-# config.py
 import yaml
 import json
 from openai import OpenAI
