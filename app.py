@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, jsonify
 from openai import OpenAI
 import json
 import string
+import random
 
 app = Flask(__name__)
 
@@ -21,13 +22,12 @@ def get_chat_completion(prompt, model="gpt-3.5-turbo", attempt_no=0, max_attempt
         messages=[
           {
             "role": "system",
-            "content": "Write in first person. "
-                       "You are to complete the user's sentence in the style of a character with a background from New Jersey, who uses colloquial speech typical of the region. "
-                       "Focus on linguistic patterns like slang, idioms, and phrasing unique to this character. "
-                       "Ensure the completion is coherent with the preceding text and maintains the character's voice. "
-                       "End the sentence with a period."
-                       "Write in first person."
-
+              "content": "Your task is to project and complete the user's description of a day in their life into a scenario set in a world affected by unchecked climate change. "
+                         "Draw on realistic consequences of environmental changes, such as extreme weather, resource scarcity, and ecological impacts. "
+                         "Adapt the user's narrative to reflect these changes, maintaining the essence of their original story but altering the setting and events to align with the effects of climate change. "
+                         "Ensure that the completion is coherent with the user's text and provides a vivid, believable depiction of life in this altered world. "
+                         "Write in the first person, from the user's perspective. "
+                         "Do not repeat yourself ever."
 
           },
           {
@@ -35,8 +35,8 @@ def get_chat_completion(prompt, model="gpt-3.5-turbo", attempt_no=0, max_attempt
             "content": prompt
           }
         ],
-        temperature=0.7,
-        max_tokens=10,
+        temperature=random.uniform(0.1, 0.4),
+        max_tokens=random.randint(5, 15),
         top_p=1
       )
       answer = json.loads(response.choices[0].json())['message']['content']
