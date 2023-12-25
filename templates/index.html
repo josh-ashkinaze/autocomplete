@@ -44,19 +44,29 @@
         var editor = $('#editor');
         var originalText = '';
         var suggestion = '';
-        var suggestionAccepted = false; // Flag to track if suggestion was accepted
+        var suggestionAccepted = false; // Flag to indicate if the suggestion was accepted
 
-        // Debounced version of the triggerAutocomplete function
+        // Function to check if the last character is not a punctuation followed by a space
+        function isMiddleOfSentence(text) {
+            return !/[\.\?\!]\s$/.test(text);
+        }
+
+        // Create a debounced version of the triggerAutocomplete function
         var debouncedAutocomplete = _.debounce(function () {
-            triggerAutocomplete();
+            if (isMiddleOfSentence(originalText)) {
+                triggerAutocomplete();
+            }
         }, 500);
 
+        // Event handler for input changes in the editor
         editor.on('input', function () {
             originalText = $(this).text();
             debouncedAutocomplete();
         });
 
+        // Function to trigger the autocomplete process
         function triggerAutocomplete() {
+            // AJAX request to the server for autocomplete suggestions
             $.ajax({
                 url: '/autocomplete',
                 type: 'POST',
@@ -64,10 +74,10 @@
                 data: JSON.stringify({ text: originalText }),
                 success: function(response) {
                     suggestion = response.completion;
-                    var suggestionHTML = originalText + '<span class="suggestion" aria-label="Autocomplete suggestion">' + suggestion + '</span>';
+                    var suggestionHTML = originalText + '<span class="suggestion">' + suggestion + '</span>';
                     $('#editor').html(suggestionHTML);
                     placeCaretAtEnd(document.getElementById('editor'));
-                    suggestionAccepted = false; // Reset the flag on successful autocomplete
+                    suggestionAccepted = false; // Reset the flag after successful autocomplete
                 },
                 error: function(xhr, status, error) {
                     console.error("Autocomplete error:", status, error);
@@ -75,26 +85,28 @@
             });
         }
 
+        // Event handler for keydown events in the editor
         editor.on('keydown', function(e) {
-            if (e.keyCode === 9) {  // Tab key
+            if (e.keyCode === 9) {  // Tab key for accepting suggestion
                 e.preventDefault();
                 if (suggestion) {
                     $(this).html(originalText + suggestion);
                     placeCaretAtEnd(document.getElementById('editor'));
                     suggestion = '';
-                    suggestionAccepted = true; // Set flag as suggestion is accepted
+                    suggestionAccepted = true; // Mark suggestion as accepted
                 }
             } else {
+                // For any other key, reset the suggestion and accepted flag
                 if (!suggestionAccepted) {
-                    // Remove the suggestion span if suggestion was not just accepted
                     $(this).html(originalText);
                     placeCaretAtEnd(document.getElementById('editor'));
                     suggestion = '';
                 }
-                suggestionAccepted = false; // Reset the flag for any key press other than Tab
+                suggestionAccepted = false;
             }
         });
 
+        // Function to place the caret at the end of the editor content
         function placeCaretAtEnd(el) {
             el.focus();
             if (typeof window.getSelection != "undefined"
@@ -109,6 +121,8 @@
         }
     });
 </script>
+
+
 
 
 </body>
