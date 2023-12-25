@@ -1,15 +1,13 @@
-# app.py
 from flask import Flask, request, render_template, jsonify
 from openai import OpenAI
 import json
 
 app = Flask(__name__)
 
+# Load OpenAI API key
 with open('secrets.json') as f:
     secrets = json.load(f)
 openai_key = secrets['openai_key']
-
-# Set your OpenAI API key
 
 def get_chat_completion(prompt, model="gpt-3.5-turbo", attempt_no=0, max_attempts=2):
   if attempt_no > max_attempts:
@@ -22,15 +20,17 @@ def get_chat_completion(prompt, model="gpt-3.5-turbo", attempt_no=0, max_attempt
         messages=[
           {
             "role": "system",
-            "content": "You will auto-complate a user's sentence to make it highly creative."
+            "content": "Given a sentence, you will auto-complete a user's sentence to make it in the style of David Foster wallace. "
+                       "Return the rest of the sentence with a period at the end."
+
           },
           {
             "role": "user",
             "content": prompt
           }
         ],
-        temperature=0.7,
-        max_tokens=64,
+        temperature=0.5,
+        max_tokens=5,
         top_p=1
       )
       answer = json.loads(response.choices[0].json())['message']['content']
@@ -46,8 +46,8 @@ def index():
 @app.route('/autocomplete', methods=['POST'])
 def autocomplete():
     text = request.json.get('text')
-    prompt = "You are an expert writer. You will help finish this sentence and say nothing else." + text
-    completion = get_chat_completion(prompt)
+    # Sending more context to the model
+    completion = get_chat_completion(text)
     return jsonify(completion=completion)
 
 if __name__ == '__main__':
