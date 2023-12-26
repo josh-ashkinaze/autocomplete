@@ -25,8 +25,10 @@ app.config['SECRET_KEY'] = app_config.flask_secret_key
 @app.route('/')
 def initial():
     """Redirect to character and event creation page."""
+    if app_config.is_offline and app_config.is_prod:
+        return render_template('offline.html'), 503  # HTTP 503 Service Unavailable
+
     if not app_config.hardcoded:
-        # Ask for character and event from user
         return redirect(url_for('user_settings'))
     else:
         # Read this stuff from YAML file
@@ -254,6 +256,4 @@ def extract_complete_words(text):
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    is_prod = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None
-    app.run(host='0.0.0.0', port=port, debug=not is_prod)
+    app.run(host='0.0.0.0', port=app_config.port, debug=not app_config.is_prod)

@@ -39,6 +39,11 @@ class AppConfig:
             #raise NotImplementedError("Dynamic character and event creation is WIP")
             pass
 
+        # offline settings
+        self.is_offline = self.config['app_is_offline']
+        self.port = int(os.environ.get('PORT', 5000))
+        self.is_prod = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None
+
         # Autocomplete settings
         self.debounce_time = self.config['autocomplete']['debounce_time']
         self.min_sentences = self.config['autocomplete']['min_sentences']
