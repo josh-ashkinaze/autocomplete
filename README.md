@@ -1,6 +1,5 @@
 # Description 
-This is a simple web app that uses OpenAI to autocomplate text for given 'character', as if that character experienced a 
-certain situation.
+Fill here
 
 # File Structure
 - `app.py` is the main file that runs the web app
