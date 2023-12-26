@@ -73,18 +73,17 @@ def autocomplete():
 def char_and_event():
     character_form = CharacterForm()
     event_form = EventForm()
-
     if request.method == 'POST':
         if character_form.validate_on_submit() and event_form.validate_on_submit():
+            flash('Character and event created successfully!', 'success')
             session['character_description'] = construct_character_description(character_form)
             session['event_name'] = event_form.event_name.data
             session['event_description'] = get_dynamic_effects(session['character_description'], session['event_name'])
-            flash('Character and event created successfully!', 'success')
             return redirect(url_for('index'))  # Redirect to the index route
         else:
             flash('Please correct the errors in the form.', 'error')
-
-    return render_template('char_and_event.html', character_form=character_form, event_form=event_form)
+    elif request.method == 'GET':
+        return render_template('char_and_event.html', character_form=character_form, event_form=event_form)
 
 
 def get_dynamic_effects(character_description, event_description, attempt_no=0, max_attempts=2):

@@ -6,14 +6,14 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h2>Create Your Character and Event</h2>
+        <h2>Tell me about yourself and the event. I will then help you simulate what it would be like if you experienced the event.</h2>
         <form method="post" action="{{ url_for('char_and_event') }}" novalidate class="mt-4">
             {{ character_form.hidden_tag() }}
             {{ event_form.hidden_tag() }}
 
             <div class="card mb-3">
                 <div class="card-body">
-                    <h3 class="card-title">Character Information</h3>
+                    <h3 class="card-title">Information</h3>
                     {% for field in character_form %}
                         <div class="form-group">
                             {{ field.label(class="form-control-label") }}
@@ -32,7 +32,7 @@
 
             <div class="card mb-4">
                 <div class="card-body">
-                    <h3 class="card-title">Event Name</h3>
+                    <h3 class="card-title">Event</h3>
                     <div class="form-group">
                         {{ event_form.event_name.label(class="form-control-label") }}
                         {{ event_form.event_name(class="form-control", placeholder=event_form.event_name.label.text) }}
