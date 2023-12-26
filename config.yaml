@@ -22,7 +22,7 @@ autocomplete:
 
   # What proportion (d=0.7) of auto-completes should be relevant to the event. Lower than 1 to keep
   # not so heavy haanded
-  event_relevant: 0.7
+  event_relevant: 0.2
 
 
 characters:
