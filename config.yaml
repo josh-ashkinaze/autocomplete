@@ -17,17 +17,26 @@ characters:
     occupation: "College Student"
     location: "Vermont"
     hobbies: ["Watching baseball", "listening to maccabeats", "eating nutella"]
-    personality: "Introverted, quirky"
+    personality: "introverted, particular, quirky"
+
+  karen:
+    name: "karen"
+    age: 60
+    gender: "Female"
+    occupation: "Social Work professor"
+    location: "Oradell, NJ"
+    hobbies: ["meditation", "yoga", "museums", "walking"]
+    personality: "intense and ambitious and also passionate"
 
   alan:
-    name: "alan"
-    age: 64
+    name: "jay"
+    age: 32
     gender: "Male"
-    occupation: "Semi Retried Lawyer"
-    location: "New Jersey"
-    hobbies: ["Tennis", "pickleball", "barking"]
-    personality: "Unreflective, talkative"
+    occupation: "Unemployed"
+    location: "Princeton, New Jersey"
+    hobbies: ["computer programming", "tech and business", "travel", "fashion", "meditation"]
+    personality: "friendly, care-free, non-judgemental, open-minded, and adventurous"
 
 event:
-  name: "Unemployment"
+  name: "Unchecked climate change. Specifically, two degrees of warming."
   effects:
