@@ -9,7 +9,6 @@ class CharacterForm(FlaskForm):
     location = StringField('Location', validators=[DataRequired(), Length(max=100)])
     hobbies = StringField('Hobbies', validators=[DataRequired()])
     personality = StringField('Personality', validators=[DataRequired(), Length(max=200)])
-    submit = SubmitField('Create Character')
 
 class EventForm(FlaskForm):
     event_name = StringField('Event Name', validators=[DataRequired(), Length(max=100)])

@@ -84,7 +84,7 @@ def char_and_event():
         else:
             flash('Please correct the errors in the form.', 'error')
     elif request.method == 'GET':
-        return render_template('char_and_event.html', character_form=character_form, event_form=event_form)
+        return render_template('settings.html', character_form=character_form, event_form=event_form)
 
 
 def get_dynamic_effects(character_description, event_description, attempt_no=0, max_attempts=2):
@@ -254,7 +254,6 @@ def extract_complete_words(text):
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Use PORT environment variable or default to 5000
+    port = int(os.environ.get('PORT', 5000))
     is_prod = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None
-    print("IS PROD", is_prod)
     app.run(host='0.0.0.0', port=port, debug=not is_prod)
