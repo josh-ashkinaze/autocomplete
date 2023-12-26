@@ -10,6 +10,7 @@ import json
 import random
 import re
 import string
+import os
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 
@@ -253,4 +254,6 @@ def extract_complete_words(text):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))  # Use PORT environment variable or default to 5000
+    is_prod = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None
+    app.run(host='0.0.0.0', port=port, debug=not is_prod)
