@@ -7,7 +7,7 @@
 <body>
     <div class="container mt-5">
         <h2>Tell me about yourself and the event. I will then help you simulate what it would be like if you experienced the event.</h2>
-        <form method="post" action="{{ url_for('char_and_event') }}" novalidate class="mt-4">
+        <form method="post" action="{{ url_for('user_settings') }}" novalidate class="mt-4">
             {{ character_form.hidden_tag() }}
             {{ event_form.hidden_tag() }}
 

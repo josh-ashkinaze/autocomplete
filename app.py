@@ -27,7 +27,7 @@ def initial():
     """Redirect to character and event creation page."""
     if not app_config.hardcoded:
         # Ask for character and event from user
-        return redirect(url_for('char_and_event'))
+        return redirect(url_for('user_settings'))
     else:
         # Read this stuff from YAML file
         session['character_description'] = app_config.character_description
@@ -70,8 +70,8 @@ def autocomplete():
 ############################################################
 # HANDLE CHARACTER CREATION
 ############################################################
-@app.route('/char_and_event', methods=['GET', 'POST'])
-def char_and_event():
+@app.route('/user_settings', methods=['GET', 'POST'])
+def user_settings():
     character_form = CharacterForm()
     event_form = EventForm()
     if request.method == 'POST':
@@ -84,7 +84,7 @@ def char_and_event():
         else:
             flash('Please correct the errors in the form.', 'error')
     elif request.method == 'GET':
-        return render_template('settings.html', character_form=character_form, event_form=event_form)
+        return render_template('user_settings.html', character_form=character_form, event_form=event_form)
 
 
 def get_dynamic_effects(character_description, event_description, attempt_no=0, max_attempts=2):
