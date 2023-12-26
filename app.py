@@ -62,47 +62,6 @@ def autocomplete():
     #print(d)
     return jsonify(completion=de_duped_completion)
 
-def get_chat_completion(character_description,
-                        event,
-                        event_effects,
-                        context,
-                        incomplete_sentence,
-                        model,
-                        temperature,
-                        max_tokens,
-                        top_p,
-                        attempt_no=0,
-                        max_attempts=2):
-    if attempt_no > max_attempts:
-        return None
-    else:
-        try:
-            client = app_config.client
-            response = client.chat.completions.create(
-                model=model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": f"INSTRUCTIONS\nFinish a sentence in the style of a character who is affected by {event}.\nCHARACTER DESCRIPTION:\n{character_description}\nEVENT:\n{event}\nEVENT EFFECTS:\n{event_effects}.\n\nGiven the CONTEXT of what the user finish the INCOMPLETE SENTENCE to sound like the character who is affected by the event."
-                    },
-                    {
-                        "role": "user",
-                        "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"
-                    }
-                ],
-                temperature=temperature,
-                max_tokens=max_tokens,
-                top_p=top_p
-            )
-            answer = json.loads(response.choices[0].json())['message']['content']
-            answer = answer.replace("INCOMPLETE SENTENCE:", "")
-            answer = answer.replace("INCOMPLETE SENTENCE: ", "")
-
-            return answer
-        except Exception as e:
-            print(e)
-            return get_chat_completion(context=context, incomplete_sentence=incomplete_sentence, model=model,
-                                       attempt_no=attempt_no + 1, max_attempts=2)
 ############################################################
 # HANDLE CHARACTER CREATION
 ############################################################
@@ -152,8 +111,49 @@ def construct_character_description(form):
 
 
 ############################################################
-# HELPER FUNCTIONS FOR PROCESSING TEXT
+# FUNCTIONS FOR PROCESSING TEXT
 ############################################################
+def get_chat_completion(character_description,
+                        event,
+                        event_effects,
+                        context,
+                        incomplete_sentence,
+                        model,
+                        temperature,
+                        max_tokens,
+                        top_p,
+                        attempt_no=0,
+                        max_attempts=2):
+    if attempt_no > max_attempts:
+        return None
+    else:
+        try:
+            client = app_config.client
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"INSTRUCTIONS\nFinish a sentence in the style of a character who is affected by {event}.\nCHARACTER DESCRIPTION:\n{character_description}\nEVENT:\n{event}\nEVENT EFFECTS:\n{event_effects}.\n\nGiven the CONTEXT of what the user finish the INCOMPLETE SENTENCE to sound like the character who is affected by the event."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"
+                    }
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens,
+                top_p=top_p
+            )
+            answer = json.loads(response.choices[0].json())['message']['content']
+            answer = answer.replace("INCOMPLETE SENTENCE:", "")
+            answer = answer.replace("INCOMPLETE SENTENCE: ", "")
+
+            return answer
+        except Exception as e:
+            print(e)
+            return get_chat_completion(context=context, incomplete_sentence=incomplete_sentence, model=model,
+                                       attempt_no=attempt_no + 1, max_attempts=2)
 def remove_duplicated_completion(incomplete_sentence, completion):
     """
     Sometimes the LLM returns a completion that is a duplicate of the incomplete sentence. This function removes that duplication.
@@ -170,7 +170,6 @@ def remove_duplicated_completion(incomplete_sentence, completion):
     # Desired Completion = I want to go to
     # Solution: Strip from the length of incomplete sentence onwards
     if completion.startswith(incomplete_sentence):
-        # Remove the length of the incomplete sentence plus any trailing space
         return completion[len(incomplete_sentence):].lstrip()
 
     # Case 2: Total Overlap But Non-Starting
