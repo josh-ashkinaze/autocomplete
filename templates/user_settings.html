@@ -5,127 +5,132 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700&display=swap" rel="stylesheet">
     <style>
-        @keyframes backgroundMove {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+       @keyframes backgroundMove {
+    0%, 100% {
+        background-position: 0% 0%;
+    }
+    50% {
+        background-position: 70% 70%;
+    }
 }
 
-body {
-  font-family: 'Roboto', sans-serif;
-  background: linear-gradient(72deg, #FFD1BA, #B2F9FC, #DCC7FF, #FFD1BA);
-  animation: backgroundMove 1s ease infinite;
-  color: #36454F;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
 
-.container {
-  background: #FFFFFF;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 700px;
-}
 
-h2, h3 {
-  text-align: left;
-  font-weight: 400;
-  margin-bottom: 20px;
-}
+        body {
+            font-family: 'Roboto', sans-serif;
+       background: linear-gradient(124deg, #FFD1BA, #B2F9FC, #DCC7FF, #FFD1BA);
+    background-size: 200% 200%;
+    animation: backgroundMove 2s ease-in-out infinite;
+            color: #36454F;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
 
-.form-group {
-  margin-bottom: 15px;
-}
+        .container {
+            background: #FFFFFF;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
 
-.form-control {
-  border: 1px solid #DCC7FF;
-  border-radius: 20px;
-  font-size: 16px;
-  transition: border-color 0.3s ease;
-}
+        h2, h3 {
+            text-align: left;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
 
-.form-control:focus {
-  border-color: #FFD1BA;
-  box-shadow: none;
-}
+        .form-group {
+            margin-bottom: 15px;
+        }
 
-.btn-primary {
-  background-color: #DCC7FF;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 4px;
-  width: 100%;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
+        .form-control {
+            border: 1px solid #DCC7FF;
+            border-radius: 20px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
 
-.btn-primary:hover {
-  background-color: #B2F9FC;
-}
+        .form-control:focus {
+            border-color: #FFD1BA;
+            box-shadow: none;
+        }
 
-@media (max-width: 768px) {
-  .container {
-    padding: 15px;
-    max-width: 90%;
-  }
+        .btn-primary {
+            background-color: #DCC7FF;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-  .form-control {
-    font-size: 14px;
-  }
-}
+        .btn-primary:hover {
+            background-color: #B2F9FC;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                max-width: 90%;
+            }
+
+            .form-control {
+                font-size: 14px;
+            }
+        }
 
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Your Life But Different</h2>
-        <p class="lead">Write a diary entry with an AI editor that autocompletes your thoughts--as you--but if you experienced a specific event. </p>
-        <form method="post" action="{{ url_for('user_settings') }}" novalidate>
-            {{ character_form.hidden_tag() }}
-            {{ event_form.hidden_tag() }}
+<div class="container">
+    <h2>Your Life But Different</h2>
+    <p class="lead">Write a diary entry with an AI editor that autocompletes your thoughts--as you--but if you
+        experienced a specific event. </p>
+    <form method="post" action="{{ url_for('user_settings') }}" novalidate>
+        {{ character_form.hidden_tag() }}
+        {{ event_form.hidden_tag() }}
 
-            <h3>About You</h3>
-            <p class="lead">The more info you give, the better the simulation :)</p>
+        <h3>About You</h3>
+        <p class="lead">The more info you give, the better the simulation :)</p>
 
-            {% for field in character_form if field.name != 'csrf_token' %}
-    <div class="form-group">
-        {{ field.label(class="form-control-label") }}
-        {% if field.type == 'TextAreaField' %}
-            <textarea class="form-control" name="{{ field.name }}" placeholder="{{ field.render_kw.placeholder }}">{{ field._value() }}</textarea>
-        {% else %}
-            {{ field(class="form-control") }}
-        {% endif %}
-        {% if field.errors %}
-            <span class="text-danger">{{ field.errors|first }}</span>
-        {% endif %}
-    </div>
-{% endfor %}
+        {% for field in character_form if field.name != 'csrf_token' %}
+            <div class="form-group">
+                {{ field.label(class="form-control-label") }}
+                {% if field.type == 'TextAreaField' %}
+                    <textarea class="form-control" name="{{ field.name }}"
+                              placeholder="{{ field.render_kw.placeholder }}">{{ field._value() }}</textarea>
+                {% else %}
+                    {{ field(class="form-control") }}
+                {% endif %}
+                {% if field.errors %}
+                    <span class="text-danger">{{ field.errors|first }}</span>
+                {% endif %}
+            </div>
+        {% endfor %}
 
-            <h3>Event/Scenario</h3>
-            {% for field in event_form if field.name != 'csrf_token' %}
-                <div class="form-group">
-                    {{ field.label(class="form-control-label") }}
-                    {{ field(class="form-control", placeholder=field.description) }}
-                    {% if field.errors %}
-                        <span class="text-danger">{{ field.errors|first }}</span>
-                    {% endif %}
-                </div>
-            {% endfor %}
+        <h3>Event/Scenario</h3>
+        {% for field in event_form if field.name != 'csrf_token' %}
+            <div class="form-group">
+                {{ field.label(class="form-control-label") }}
+                {{ field(class="form-control", placeholder=field.description) }}
+                {% if field.errors %}
+                    <span class="text-danger">{{ field.errors|first }}</span>
+                {% endif %}
+            </div>
+        {% endfor %}
 
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-    </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
 </body>
 </html>

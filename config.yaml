@@ -1,13 +1,13 @@
 # If true we read character and event
 # from the config.yaml file. Else,
 # display a form to the user to fill out
-hardcode_character_and_event: false
+hardcode_character_and_event: true
 
 app_is_offline: true
 
 openai:
   model: "gpt-3.5-turbo"
-  temperature_min: 0.8
+  temperature_min: 0.5
   temperature_max: 0.9
   max_tokens_min: 5
   max_tokens_max: 15
@@ -24,7 +24,7 @@ autocomplete:
 
   # What proportion (d=0.7) of auto-completes should be relevant to the event. Lower than 1 to keep
   # not so heavy haanded
-  event_relevant: 0.8
+  event_relevant: 0.7
 
 
 characters:
@@ -56,6 +56,6 @@ characters:
     personality: "friendly, care-free, non-judgemental, open-minded, and adventurous"
 
 event:
-  name: "Unchecked climate change. Specifically, two degrees of warming."
+  name: "Unchecked climate change"
   effects:
   effects_generator_model: "gpt-3.5-turbo" # The model used to generate the effects

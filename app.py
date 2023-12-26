@@ -26,12 +26,13 @@ app.config['SECRET_KEY'] = app_config.flask_secret_key
 def initial():
     if app_config.is_offline and app_config.is_prod:
         return render_template('offline.html'), 503  # HTTP 503 Service Unavailable
-    if not app_config.hardcoded: # Ask user to create character and event
+    if not app_config.hardcoded:  # Ask user to create character and event
         return redirect(url_for('user_settings'))
-    else: # Use hardcoded character and event
+    else:  # Use hardcoded character and event
         session['character_description'] = app_config.character_description
-        session['event_name'] = app_config.event
+        session['event_name'] = app_config.event['name']
         session['event_description'] = app_config.event_description
+        print(session)
         return redirect(url_for('index'))
 
 
@@ -43,15 +44,20 @@ def index():
 @app.route('/autocomplete', methods=['GET', 'POST'])
 def autocomplete():
     """ Handle the autocomplete request. """
-    text = normalize_spacing(request.json.get('text'))
+    text = normalize_spacing(remove_prompt_words(request.json.get('text')))
     context, incomplete_sentence = get_context_and_incomplete_sentence(normalize_spacing(text))
     context, incomplete_sentence = normalize_spacing(context), normalize_spacing(incomplete_sentence)
     include_event = random.random() <= app_config.event_relevant
+    if include_event:
+        temperature = app_config.temperature_range[0]
+    else:
+        temperature = random.uniform(*app_config.temperature_range)
     completion = normalize_spacing(
         get_chat_completion(character_description=session['character_description'], event=session['event_name'],
-                            event_effects=session['event_description'], include_event=include_event, model=app_config.model,
+                            event_effects=session['event_description'],
+                            include_event=include_event, model=app_config.model,
                             context=context, incomplete_sentence=incomplete_sentence,
-                            temperature=random.uniform(*app_config.temperature_range),
+                            temperature=temperature,
                             max_tokens=random.randint(*app_config.token_range), top_p=app_config.top_p))
     full_word_completion = normalize_spacing(extract_complete_words(completion))
     de_duped_completion = normalize_spacing(remove_duplicated_completion(incomplete_sentence, full_word_completion))
@@ -116,19 +122,21 @@ def get_chat_completion(character_description, event, event_effects, context, in
         try:
             client = app_config.client
             if include_event:
-                system_instructions = f"INSTRUCTIONS\nFinish a sentence in the style of a character who is affected by {event}.\nCHARACTER DESCRIPTION:\n{character_description}\nEVENT:\n{event}\nEVENT EFFECTS:\n{event_effects}.\n\nGiven the CONTEXT of what the character wrote, finish the INCOMPLETE SENTENCE to sound like the character who is affected by the event."
+                system_instructions = f"INSTRUCTIONS\nFinish a sentence in the style of a character who is affected by {event}.\n\nCHARACTER DESCRIPTION:\n{character_description}\nEVENT:\n{event}\nEVENT EFFECTS:\n{event_effects}.\n\nCONSTRAINTS\n-Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE in the style of the character, affected by the event.\n-Do not be overly positive. Be realistic.\n-Write clearly and concisely."
             else:
-                system_instructions = f"INSTRUCTIONS\nFinish a sentence in the style of a character.\nCHARACTER DESCRIPTION:\n{character_description}.\n\nGiven the CONTEXT of what the character wrote, finish the INCOMPLETE SENTENCE to sound like the character, consistent with what was written."
+                system_instructions = f"INSTRUCTIONS\nFinish a sentence in the style of a character.\nCHARACTER DESCRIPTION:\n{character_description}.\n\nGiven the CONTEXT of what the character wrote, finish the INCOMPLETE SENTENCE to sound like the character. \n-Do not be overly positive. Be realistic.\n-Write clearly and concisely."
 
             response = client.chat.completions.create(model=model,
                                                       messages=[{"role": "system", "content": system_instructions},
-                                                                {"role": "user", "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"}],
+                                                                {"role": "user",
+                                                                 "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"}],
                                                       temperature=temperature, max_tokens=max_tokens, top_p=top_p)
-            answer = json.loads(response.choices[0].json())['message']['content']
+            print(system_instructions)
+            print(f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}")
 
+            answer = json.loads(response.choices[0].json())['message']['content']
             return answer
         except Exception as e:
-            print(e)
             return get_chat_completion(context=context, incomplete_sentence=incomplete_sentence, model=model,
                                        temperature=temperature, max_tokens=max_tokens, top_p=top_p,
                                        include_event=include_event, attempt_no=attempt_no + 1, max_attempts=2)
@@ -193,6 +201,14 @@ def normalize_spacing(text):
     return text
 
 
+def remove_prompt_words(text):
+    """Remove any prompt wods that LLM accidently included in answer"""
+    bad_words = ['INSTRUCTIONS', 'CONTEXT', 'INCOMPLETE SENTENCE', 'CHARACTER DESCRIPTION', 'EVENT', 'EVENT EFFECTS']
+    pattern = re.compile(r'\b(' + '|'.join(map(re.escape, bad_words)) + r')\b')
+    text = pattern.sub('', text)
+    return text
+
+
 def get_context_and_incomplete_sentence(text):
     """
     We feed into the model both the prior context for what was written and the current
@@ -247,6 +263,4 @@ def extract_complete_words(text):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',
-            port=app_config.port,
-            debug=not app_config.is_prod)
+    app.run(host='0.0.0.0', port=app_config.port, debug=not app_config.is_prod)

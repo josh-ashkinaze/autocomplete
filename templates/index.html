@@ -35,12 +35,20 @@
             font-style: italic;
         }
 
+        [contenteditable=true]:empty:before {
+            content: attr(data-placeholder);
+            color: #6c757d; /* Placeholder text color */
+            cursor: text;
+            font-style: italic;
+        }
+
     </style>
 </head>
 <body>
-    <input type="hidden" id="debounce_time" value="{{ debounce_time }}">
-    <input type="hidden" id="min_sentences" value="{{ min_sentences }}">
-    <div contenteditable="true" placeholder="asd" id="editor" class="form-control"></div>
+<input type="hidden" id="debounce_time" value="{{ debounce_time }}">
+<input type="hidden" id="min_sentences" value="{{ min_sentences }}">
+<div contenteditable="true" data-placeholder="Start typing about a day in your life. For example, start with: 'I woke up and had breakfast'." id="editor" class="form-control"></div>
+
 
 <script>
     var debounce_time = parseInt(document.getElementById('debounce_time').value);
@@ -85,13 +93,13 @@
                 url: '/autocomplete',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ text: originalText }),
-                success: function(response) {
+                data: JSON.stringify({text: originalText}),
+                success: function (response) {
                     suggestion = response.completion || '';
                     updateEditorText();
                     suggestionAccepted = false;
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error("Autocomplete error:", status, error);
                     suggestion = ''; // Clear suggestion on error
                     updateEditorText();
@@ -99,7 +107,7 @@
             });
         }
 
-        editor.on('keydown', function(e) {
+        editor.on('keydown', function (e) {
             if (e.keyCode === 9 && suggestion) {  // Tab key
                 e.preventDefault();
                 originalText += suggestion;
@@ -122,9 +130,6 @@
         }
     });
 </script>
-
-
-
 
 
 </body>
