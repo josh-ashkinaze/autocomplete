@@ -16,15 +16,6 @@ class AppConfig:
         self.top_p = self.config['openai']['top_p']
         self.max_attempts = self.config['openai']['max_attempts']
 
-        if self.hardcoded:
-            self.event = self.config['event']
-            self.character = self.config['characters']['alan']
-            self.character_description = self.construct_character_description()
-            self.event_description = self.get_dynamic_effects()
-        else:
-            raise NotImplementedError("Dynamic character and event creation is WIP")
-            pass
-
         # Use an environment variable for the OpenAI key
         self.openai_key = os.getenv('OPENAI_KEY')
         if not self.openai_key:
@@ -37,6 +28,16 @@ class AppConfig:
             )
         self.client = OpenAI(api_key=self.openai_key)
         self.flask_secret_key = os.getenv('FLASK_SECRET_KEY')
+
+        if self.hardcoded:
+            self.event = self.config['event']
+            self.character = self.config['characters']['karen']
+            self.character_description = self.construct_character_description()
+            self.event_description = self.get_dynamic_effects()
+        else:
+            raise NotImplementedError("Dynamic character and event creation is WIP")
+            pass
+
 
     def load_yaml_config(self, filepath):
         """ Load configuration from a YAML file. """
@@ -68,7 +69,7 @@ class AppConfig:
                          Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic and specific. Do not exaggerate.
                         DESCRIPTION:
                         {self.character_description}"""}],
-                                                          temperature=0.6, max_tokens=250, top_p=1)
+                                                          temperature=0.8, max_tokens=500, top_p=1)
                 answer = json.loads(response.choices[0].json())['message']['content']
                 return answer
             except Exception as e:
