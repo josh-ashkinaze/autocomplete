@@ -24,14 +24,11 @@ app.config['SECRET_KEY'] = app_config.flask_secret_key
 
 @app.route('/')
 def initial():
-    """Redirect to character and event creation page."""
     if app_config.is_offline and app_config.is_prod:
         return render_template('offline.html'), 503  # HTTP 503 Service Unavailable
-
-    if not app_config.hardcoded:
+    if not app_config.hardcoded: # Ask user to create character and event
         return redirect(url_for('user_settings'))
-    else:
-        # Read this stuff from YAML file
+    else: # Use hardcoded character and event
         session['character_description'] = app_config.character_description
         session['event_name'] = app_config.event
         session['event_description'] = app_config.event_description
@@ -49,18 +46,13 @@ def autocomplete():
     text = normalize_spacing(request.json.get('text'))
     context, incomplete_sentence = get_context_and_incomplete_sentence(normalize_spacing(text))
     context, incomplete_sentence = normalize_spacing(context), normalize_spacing(incomplete_sentence)
-    ct = random.random()
-    print(ct)
-    print(app_config.event_relevant)
     include_event = random.random() <= app_config.event_relevant
-    print("include_event", include_event)
     completion = normalize_spacing(
         get_chat_completion(character_description=session['character_description'], event=session['event_name'],
                             event_effects=session['event_description'], include_event=include_event, model=app_config.model,
                             context=context, incomplete_sentence=incomplete_sentence,
                             temperature=random.uniform(*app_config.temperature_range),
                             max_tokens=random.randint(*app_config.token_range), top_p=app_config.top_p))
-    # Make sure LLM didn't stop mid-word
     full_word_completion = normalize_spacing(extract_complete_words(completion))
     de_duped_completion = normalize_spacing(remove_duplicated_completion(incomplete_sentence, full_word_completion))
     d = {'text': text, 'context': context, 'incomplete_sentence': incomplete_sentence, 'completion': completion,
@@ -70,7 +62,7 @@ def autocomplete():
 
 
 ############################################################
-# HANDLE CHARACTER CREATION
+# HANDLE CHARACTER AND EVENT CREATION
 ############################################################
 @app.route('/user_settings', methods=['GET', 'POST'])
 def user_settings():
@@ -80,9 +72,9 @@ def user_settings():
         if character_form.validate_on_submit() and event_form.validate_on_submit():
             flash('Character and event created successfully!', 'success')
             session['character_description'] = construct_character_description(character_form)
-            session['event_name'] = event_form.event_name.data
+            session['event_name'] = event_form.event.data
             session['event_description'] = get_dynamic_effects(session['character_description'], session['event_name'])
-            return redirect(url_for('index'))  # Redirect to the index route
+            return redirect(url_for('index'))
         else:
             flash('Please correct the errors in the form.', 'error')
     elif request.method == 'GET':
@@ -110,7 +102,7 @@ def get_dynamic_effects(character_description, event_description, attempt_no=0, 
 
 
 def construct_character_description(form):
-    return f"{form.name.data}, a {form.age.data}-year-old {form.gender.data.lower()} from {form.location.data}, working as a {form.occupation.data}, with hobbies including {form.hobbies.data}. Known for being {form.personality.data}."
+    return f"I am {form.age.data} years old from {form.location.data}, working as a {form.occupation.data}. My hobbies include {form.hobbies.data}. My friends describe me as {form.personality.data}."
 
 
 ############################################################
@@ -234,7 +226,7 @@ def extract_complete_words(text):
     incomplete words depending on tokens. But in practice, it is expensive to accurately check if a word is complete,
     so a simple heuristic is used:
 
-    - If the immediate character before the last word is whitespace or punctuation, then the word is neceesarily complete.
+    - If the immediate character before the last word is whitespace or punctuation, then the word is necessarily complete.
     - If the word is not necessarily complete, then it is assumed to be incomplete.
     - Note: This means in practice we often just delete the last word of the completion.
 
@@ -245,7 +237,6 @@ def extract_complete_words(text):
     """
     if not text:
         return text
-
     words = text.split()
     if not words:
         return text
@@ -256,4 +247,6 @@ def extract_complete_words(text):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=app_config.port, debug=not app_config.is_prod)
+    app.run(host='0.0.0.0',
+            port=app_config.port,
+            debug=not app_config.is_prod)

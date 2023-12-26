@@ -16,19 +16,19 @@ openai:
 
 autocomplete:
   # The deboucne time (ms) is the spacing between calls (d=700)
-  debounce_time: 700
+  debounce_time: 800
 
   # How many sentences (d=2) to require the user to write before we start auto-complete
   # It has to be more than 1 because we need to know the context of the sentence
-  min_sentences: 2
+  min_sentences: 1
 
   # What proportion (d=0.7) of auto-completes should be relevant to the event. Lower than 1 to keep
   # not so heavy haanded
-  event_relevant: 0.2
+  event_relevant: 0.8
 
 
 characters:
-  eliana:
+  p1:
     name: "eliana"
     age: 23
     gender: "Female"
@@ -37,7 +37,7 @@ characters:
     hobbies: ["Watching baseball", "listening to maccabeats", "eating nutella"]
     personality: "introverted, particular, quirky"
 
-  karen:
+  p2:
     name: "karen"
     age: 60
     gender: "Female"
@@ -46,11 +46,11 @@ characters:
     hobbies: ["meditation", "yoga", "museums", "walking"]
     personality: "intense and ambitious and also passionate"
 
-  alan:
-    name: "jay"
+  p3:
+    name: "Matt"
     age: 32
     gender: "Male"
-    occupation: "Unemployed"
+    occupation: "Unemployed since got chronic illness"
     location: "Princeton, New Jersey"
     hobbies: ["computer programming", "tech and business", "travel", "fashion", "meditation"]
     personality: "friendly, care-free, non-judgemental, open-minded, and adventurous"

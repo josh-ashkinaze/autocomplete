@@ -34,12 +34,13 @@
             color: #6c757d;
             font-style: italic;
         }
+
     </style>
 </head>
 <body>
     <input type="hidden" id="debounce_time" value="{{ debounce_time }}">
     <input type="hidden" id="min_sentences" value="{{ min_sentences }}">
-    <div contenteditable="true" id="editor" class="form-control"></div>
+    <div contenteditable="true" placeholder="asd" id="editor" class="form-control"></div>
 
 <script>
     var debounce_time = parseInt(document.getElementById('debounce_time').value);
