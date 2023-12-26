@@ -35,7 +35,7 @@ def initial():
 
 @app.route('/index')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', debounce_time=app_config.debounce_time, min_sentences=app_config.min_sentences)
 
 @app.route('/autocomplete', methods=['GET', 'POST'])
 def autocomplete():
@@ -43,11 +43,13 @@ def autocomplete():
     text = normalize_spacing(request.json.get('text'))
     context, incomplete_sentence = get_context_and_incomplete_sentence(normalize_spacing(text))
     context, incomplete_sentence = normalize_spacing(context), normalize_spacing(incomplete_sentence)
-
+    include_event = random.random() <= app_config.event_relevant
+    print("include_event", include_event)
     completion = normalize_spacing(get_chat_completion(
         character_description=session['character_description'],
         event=session['event_name'],
         event_effects=session['event_description'],
+        include_event = include_event,
         model=app_config.model,
         context=context,
         incomplete_sentence=incomplete_sentence,
@@ -122,6 +124,7 @@ def get_chat_completion(character_description,
                         temperature,
                         max_tokens,
                         top_p,
+                        include_event = True,
                         attempt_no=0,
                         max_attempts=2):
     if attempt_no > max_attempts:
@@ -129,31 +132,46 @@ def get_chat_completion(character_description,
     else:
         try:
             client = app_config.client
-            response = client.chat.completions.create(
-                model=model,
-                messages=[
+            if include_event:
+                messages = [
                     {
                         "role": "system",
-                        "content": f"INSTRUCTIONS\nFinish a sentence in the style of a character who is affected by {event}.\nCHARACTER DESCRIPTION:\n{character_description}\nEVENT:\n{event}\nEVENT EFFECTS:\n{event_effects}.\n\nGiven the CONTEXT of what the user finish the INCOMPLETE SENTENCE to sound like the character who is affected by the event."
+                        "content": f"INSTRUCTIONS\nFinish a sentence in the style of a character who is affected by {event}.\nCHARACTER DESCRIPTION:\n{character_description}\nEVENT:\n{event}\nEVENT EFFECTS:\n{event_effects}.\n\nGiven the CONTEXT of what the character wrote, finish the INCOMPLETE SENTENCE to sound like the character who is affected by the event."
                     },
                     {
                         "role": "user",
                         "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"
                     }
                 ],
+            else:
+                messages = [
+                    {
+                        "role": "system",
+                        "content": f"INSTRUCTIONS\nFinish a sentence in the style of a character.\nCHARACTER DESCRIPTION:\n{character_description}.\n\nGiven the CONTEXT of what the character wrote, finish the INCOMPLETE SENTENCE to sound like the character, consistent with what was written."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"
+                    }
+                ]
+            response = client.chat.completions.create(
+                model=model,
+                messages = messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
                 top_p=top_p
             )
             answer = json.loads(response.choices[0].json())['message']['content']
-            answer = answer.replace("INCOMPLETE SENTENCE:", "")
-            answer = answer.replace("INCOMPLETE SENTENCE: ", "")
+            for bad_word in ["INCOMPLETE SENTENCE", "CONTEXT", "INCOMPLETE SENTENCE", "CONTEXT"]:
+                if bad_word in answer:
+                    answer = answer.replace(bad_word+":", "")
+                    answer = answer.replace(bad_word + ":", "")
 
             return answer
         except Exception as e:
             print(e)
             return get_chat_completion(context=context, incomplete_sentence=incomplete_sentence, model=model,
-                                       attempt_no=attempt_no + 1, max_attempts=2)
+                                       include_event=include_event, attempt_no=attempt_no + 1, max_attempts=2)
 def remove_duplicated_completion(incomplete_sentence, completion):
     """
     Sometimes the LLM returns a completion that is a duplicate of the incomplete sentence. This function removes that duplication.

@@ -1,4 +1,7 @@
-hardcode_character_and_event: true
+# If true we read character and event
+# from the config.yaml file. Else,
+# display a form to the user to fill out
+hardcode_character_and_event: false
 
 openai:
   model: "gpt-3.5-turbo"
@@ -8,6 +11,19 @@ openai:
   max_tokens_max: 15
   top_p: 1
   max_attempts: 2
+
+autocomplete:
+  # The deboucne time (ms) is the spacing between calls (d=700)
+  debounce_time: 700
+
+  # How many sentences (d=2) to require the user to write before we start auto-complete
+  # It has to be more than 1 because we need to know the context of the sentence
+  min_sentences: 2
+
+  # What proportion (d=0.7) of auto-completes should be relevant to the event. Lower than 1 to keep
+  # not so heavy haanded
+  event_relevant: 0.7
+
 
 characters:
   eliana:
@@ -40,3 +56,4 @@ characters:
 event:
   name: "Unchecked climate change. Specifically, two degrees of warming."
   effects:
+  effects_generator_model: "gpt-3.5-turbo" # The model used to generate the effects

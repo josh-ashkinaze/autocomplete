@@ -29,15 +29,22 @@ class AppConfig:
         self.client = OpenAI(api_key=self.openai_key)
         self.flask_secret_key = os.getenv('FLASK_SECRET_KEY')
 
+        # Character and event settings
         if self.hardcoded:
             self.event = self.config['event']
             self.character = self.config['characters']['karen']
             self.character_description = self.construct_character_description()
             self.event_description = self.get_dynamic_effects()
         else:
-            raise NotImplementedError("Dynamic character and event creation is WIP")
+            #raise NotImplementedError("Dynamic character and event creation is WIP")
             pass
 
+        # Autocomplete settings
+        self.debounce_time = self.config['autocomplete']['debounce_time']
+        self.min_sentences = self.config['autocomplete']['min_sentences']
+        self.event_relevant = self.config['autocomplete']['event_relevant']
+        assert self.min_sentences >= 1, "min_sentences must be at least 1"
+        assert self.event_relevant > 0 and self.event_relevant <= 1, "min_sentences must be in (0, 1]"
 
     def load_yaml_config(self, filepath):
         """ Load configuration from a YAML file. """
@@ -45,7 +52,6 @@ class AppConfig:
             return yaml.safe_load(ymlfile)
 
     def construct_character_description(self):
-        # ToDo: make this dynamic
         char_info = self.character
         description = (
             f"{char_info['name']}, {char_info['age']} years old, {char_info['gender']} from {char_info['location']}. "

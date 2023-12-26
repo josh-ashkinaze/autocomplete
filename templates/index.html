@@ -37,9 +37,14 @@
     </style>
 </head>
 <body>
+    <input type="hidden" id="debounce_time" value="{{ debounce_time }}">
+    <input type="hidden" id="min_sentences" value="{{ min_sentences }}">
     <div contenteditable="true" id="editor" class="form-control"></div>
 
 <script>
+    var debounce_time = parseInt(document.getElementById('debounce_time').value);
+    var min_sentences = parseInt(document.getElementById('min_sentences').value);
+
     $(document).ready(function () {
         var editor = $('#editor');
         var originalText = '';
@@ -55,10 +60,10 @@
         }
 
         var debouncedAutocomplete = _.debounce(function () {
-            if (isMiddleOfSentence(originalText) && countSentences(originalText) >= 2) {
+            if (isMiddleOfSentence(originalText) && countSentences(originalText) >= min_sentences) {
                 triggerAutocomplete();
             }
-        }, 700);
+        }, debounce_time);
 
         function updateEditorText() {
             editor.text(originalText);
