@@ -256,4 +256,5 @@ def extract_complete_words(text):
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Use PORT environment variable or default to 5000
     is_prod = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None
+    print("IS PROD", is_prod)
     app.run(host='0.0.0.0', port=port, debug=not is_prod)
