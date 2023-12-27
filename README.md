@@ -7,42 +7,35 @@ Fill here
 - `forms.py` is the Flask-WTF file for forms (e.g: character/event input, pre-test questions)
 - `config.yaml` is a configuration file for settings that are global to all sessions, whereas Flask session object store user-specific settings 
 - `templates/index.html` - the HTML template for the web app
-- `templates/char_and_event.hml` - the HTML template for asking for charter and event inputs
+- `templates/user_and_event.hml` - the HTML template for asking for charter and event inputs
 
-Note: When `hardcode_character_and_event` is false it defaults to asking users for character and event inputs. Otherwise it reads this from the YAML file (e.g: for testing). 
+Note: When `hardcode_character_and_event` is false in the YAML file it defaults to asking users for character and event inputs. Otherwise it reads this from the YAML file (e.g: for testing). 
 
 # Run Locally 
 
-### Step 1: Clone the repository
+### Clone repo
 
 ```bash
-git clone https://github.com/josh-ashkinaze/autocomplete
-cd autocomplete
+git clone https://github.com/osh-ashkinaze/autocomplete.git
+cd auto
 ```
 
-### Step 2: Input your OpenAI API Key
+### Build docker image
 
-- On macOS or Linux:
-  ```bash
-  export OPENAI_KEY="your_openai_key_here"
-  ```
-
-- On Windows (using PowerShell):
-  ```powershell
-  $env:OPENAI_KEY="your_openai_key_here"
-  ```
-
-### Step 3: Build docker image
+Build the Docker image from the Dockerfile:
 
 ```bash
-docker build -t my-python-app .
+docker build -t myapp .
 ```
 
-### Step 4: Run Docker container
+This command builds the Docker image and tags it as `myapp`. You can replace `myapp` with a name of your choice.
+
+### Run docker container
 
 ```bash
-docker run -p 4000:80 -e OPENAI_KEY="${OPENAI_KEY}" my-python-app
+docker run -e OPENAI_KEY=your_openai_key -p 4000:80 myapp
 ```
 
-The application will be accessible at `http://localhost:4000`.
+Replace `your_openai_key` with your actual OpenAI API key. This command runs the container, sets the `OPENAI_KEY` environment variable inside it, and maps port 80 of the container to port 4000 on your host machine. Access the application at `http://localhost:4000`.
 
+.
