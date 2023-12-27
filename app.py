@@ -43,7 +43,7 @@ def index():
 @app.route('/autocomplete', methods=['GET', 'POST'])
 def autocomplete():
     """ Handle the autocomplete request. """
-    text = normalize_spacing(remove_prompt_words(request.json.get('text')))
+    text = normalize_spacing(request.json.get('text'))
     context, incomplete_sentence = get_context_and_incomplete_sentence(normalize_spacing(text))
     context, incomplete_sentence = normalize_spacing(context), normalize_spacing(incomplete_sentence)
     include_event = random.random() <= app_config.event_relevant
@@ -58,11 +58,12 @@ def autocomplete():
                             context=context, incomplete_sentence=incomplete_sentence,
                             temperature=temperature,
                             max_tokens=random.randint(*app_config.token_range), top_p=app_config.top_p))
-    full_word_completion = normalize_spacing(extract_complete_words(completion))
+    completion_no_prompt = remove_prompt_words(completion)
+    full_word_completion = normalize_spacing(extract_complete_words(completion_no_prompt))
     de_duped_completion = normalize_spacing(remove_duplicated_completion(incomplete_sentence, full_word_completion))
     d = {'text': text, 'context': context, 'incomplete_sentence': incomplete_sentence, 'completion': completion,
-         'full_word_completion': full_word_completion, 'de_duped_completion': de_duped_completion}
-    # print(d)
+         'full_word_completion': full_word_completion, 'de_duped_completion': de_duped_completion, 'completion_no_prompt': completion_no_prompt}
+    print(d)
     return jsonify(completion=de_duped_completion)
 
 
