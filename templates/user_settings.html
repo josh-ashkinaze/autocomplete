@@ -134,8 +134,21 @@
             </div>
         {% endfor %}
 
-        <button type="submit" class="btn btn-primary">Submit</button>
+         <!-- Modified Submit Button with Spinner -->
+    <button type="submit" class="btn btn-primary" id="submit-button">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;" id="spinner"></span>
+        Submit
+    </button>
     </form>
 </div>
+
+
+<script>
+    document.getElementById('submit-button').addEventListener('click', function() {
+        document.getElementById('spinner').style.display = 'inline-block'; // Show spinner
+        this.childNodes[2].nodeValue = ' Loading...'; // Change button text
+    });
+</script>
+
 </body>
 </html>

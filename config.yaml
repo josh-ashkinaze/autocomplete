@@ -3,6 +3,7 @@
 # display a form to the user to fill out
 hardcode_character_and_event: false
 
+# If true it displays a maintenance page when running on prod
 app_is_offline: false
 
 openai:
@@ -15,11 +16,11 @@ openai:
   max_attempts: 2
 
 autocomplete:
-  # The deboucne time (ms) is the spacing between calls (d=700)
+  # The deboucne time (ms) is the spacing between calls (d=800)
   debounce_time: 800
 
-  # How many sentences (d=2) to require the user to write before we start auto-complete
-  # It has to be more than 1 because we need to know the context of the sentence
+  # How many sentences (d=1) to require the user to write before we start auto-complete
+  # It has to be >= 1 because we need to know the context of the sentence
   min_sentences: 1
 
   # What proportion (d=0.7) of auto-completes should be relevant to the event. Lower than 1 to keep
@@ -27,6 +28,12 @@ autocomplete:
   event_relevant: 0.7
 
 
+####################################
+# Hardcoded characters and event
+####################################
+
+# These are hardcoded values for testing and will only be used if
+# hardcode_character_and_event is set to true
 characters:
   p1:
     name: "eliana"
