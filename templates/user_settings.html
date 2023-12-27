@@ -32,11 +32,12 @@
 
         .container {
             background: #FFFFFF;
-            padding: 20px;
+            padding: 50px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 800px;
+            opacity: 90%;
+            max-width: 850px;
         }
 
         h2, h3 {
@@ -92,16 +93,16 @@
 </head>
 <body>
 <div class="container">
-    <h2>Autocomplete an alternate you. </h2>
+    <h2>Autocomplete as an alternate you. </h2>
     <p class="lead">How would an alternate "you" think? This text editor autocompletes your thoughts, but set in a universe
-        where you experienced something entirely different. Simulate yourself or any character you want.</p>
+        where you experienced something entirely different. Simulate yourself or any character.</p>
 
     <form method="post" action="{{ url_for('user_settings') }}" novalidate>
         {{ character_form.hidden_tag() }}
         {{ event_form.hidden_tag() }}
 
         <h3>About You</h3>
-        <p class="lead">Be specific and evocative. The more info you give, the better the simulation :)</p>
+        <p class="lead">The more info you give, the better the simulation :)</p>
 
         {% for field in character_form if field.name != 'csrf_token' %}
             <div class="form-group">
