@@ -5,7 +5,7 @@ Fill here
 - `app.py` is the main file that runs the web app
 - `config.py`is the configuration file for the web app
 - `forms.py` is the Flask-WTF file for forms (e.g: character/event input, pre-test questions)
-- `config.yaml` is a configuration file for settings that are global to all sessions, whereas Flask session object store user-specific settings 
+- `config.yaml` is a configuration file for settings that are global to all sessions. Modify this file to change behavior.
 - `templates/index.html` - the HTML template for the web app
 - `templates/user_and_event.hml` - the HTML template for asking for charter and event inputs
 
