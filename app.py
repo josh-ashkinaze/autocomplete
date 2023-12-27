@@ -122,17 +122,16 @@ def get_chat_completion(character_description, event, event_effects, context, in
         try:
             client = app_config.client
             if include_event:
-                system_instructions = f"INSTRUCTIONS\nFinish a sentence in the style of a character who is affected by {event}.\n\nCHARACTER DESCRIPTION:\n{character_description}\nEVENT:\n{event}\nEVENT EFFECTS:\n{event_effects}.\n\nCONSTRAINTS\n-Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE in the style of the character, affected by the event.\n-Do not be overly positive or overly negative. Be realistic.\n-Write clearly, engagingly, and concisely."
+                system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence in the style of a CHARACTER who is affected by {event} and feeling the effects of this event.\n\nCHARACTER\n{character_description}\nEVENT\n{event}\nEVENT EFFECTS\n{event_effects}.\n\nCONSTRAINTS\n-Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE in the style of the character, affected by the event.\n-Do not be overly dramatic. Be realistic.\n-Do not use cheesy language\n-Write like a diary entry."
             else:
-                system_instructions = f"INSTRUCTIONS\nFinish a sentence in the style of a character.\nCHARACTER DESCRIPTION:\n{character_description}.\n\nGiven the CONTEXT of what the character wrote, finish the INCOMPLETE SENTENCE to sound like the character. \n-Do not be overly positive or overly negative. Be realistic.\n-Write clearly,engagingly, and concisely."
-
+                system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence in the style of the CHARACTER.\n\nCHARACTER\n{character_description}\n\nCONSTRAINTS\n-Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE in the style of the character.\n-Do not be overly dramatic. Be realistic.\n-Do not use cheesy language\n-Write like a diary entry."
             response = client.chat.completions.create(model=model,
                                                       messages=[{"role": "system", "content": system_instructions},
                                                                 {"role": "user",
                                                                  "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"}],
                                                       temperature=temperature, max_tokens=max_tokens, top_p=top_p)
-            #print(system_instructions)
-            #print(f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}")
+            print(system_instructions)
+            print(f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}")
 
             answer = json.loads(response.choices[0].json())['message']['content']
             return answer

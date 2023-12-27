@@ -8,12 +8,13 @@ app_is_offline: false
 
 openai:
   model: "gpt-3.5-turbo"
-  temperature_min: 0.5
-  temperature_max: 0.9
-  max_tokens_min: 5
-  max_tokens_max: 15
+  temperature_min: 0.6
+  temperature_max: 0.8
+  max_tokens_min: 15
+  max_tokens_max: 20
   top_p: 1
   max_attempts: 2
+  frequency_penalty: 0.5
 
 autocomplete:
   # The deboucne time (ms) is the spacing between calls (d=800)
@@ -63,6 +64,6 @@ characters:
     personality: "strategic, loyal, reflective"
 
 event:
-  name: "Unchecked climate change"
+  name: "climate change"
   effects:
   effects_generator_model: "gpt-3.5-turbo" # The model used to generate the effects

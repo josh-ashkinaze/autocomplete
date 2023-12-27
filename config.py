@@ -37,6 +37,7 @@ class AppConfig:
             self.character = self.config['characters']['p1']
             self.character_description = self.construct_character_description()
             self.event_description = self.get_dynamic_effects()
+            print(self.event_description)
         else:
             #raise NotImplementedError("Dynamic character and event creation is WIP")
             pass
@@ -84,10 +85,10 @@ class AppConfig:
                                                                "content": "You are a helpful, factual, and highly specific assistant."},
                                                               {"role": "user",
                                                                "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {self.event['name'].lower()} on this person. 
-                         Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic and specific. Do not exaggerate.
+                         Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic and specific. Do not exaggerate. Answer in 50 words.
                         DESCRIPTION:
                         {self.character_description}"""}],
-                                                          temperature=0.8, max_tokens=500, top_p=1)
+                                                          temperature=0.8, max_tokens=200, top_p=1)
                 answer = json.loads(response.choices[0].json())['message']['content']
                 return answer
             except Exception as e:
