@@ -1,9 +1,9 @@
 # If true we read character and event
 # from the config.yaml file. Else,
 # display a form to the user to fill out
-hardcode_character_and_event: true
+hardcode_character_and_event: false
 
-app_is_offline: true
+app_is_offline: false
 
 openai:
   model: "gpt-3.5-turbo"
