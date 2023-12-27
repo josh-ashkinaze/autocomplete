@@ -121,9 +121,9 @@ def get_chat_completion(character_description, event, event_effects, context, in
         try:
             client = app_config.client
             if include_event:
-                system_instructions = f"INSTRUCTIONS\nFinish a sentence in the style of a character who is affected by {event}.\n\nCHARACTER DESCRIPTION:\n{character_description}\nEVENT:\n{event}\nEVENT EFFECTS:\n{event_effects}.\n\nCONSTRAINTS\n-Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE in the style of the character, affected by the event.\n-Do not be overly positive. Be realistic.\n-Write clearly and concisely."
+                system_instructions = f"INSTRUCTIONS\nFinish a sentence in the style of a character who is affected by {event}.\n\nCHARACTER DESCRIPTION:\n{character_description}\nEVENT:\n{event}\nEVENT EFFECTS:\n{event_effects}.\n\nCONSTRAINTS\n-Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE in the style of the character, affected by the event.\n-Do not be overly positive or overly negative. Be realistic.\n-Write clearly, engagingly, and concisely."
             else:
-                system_instructions = f"INSTRUCTIONS\nFinish a sentence in the style of a character.\nCHARACTER DESCRIPTION:\n{character_description}.\n\nGiven the CONTEXT of what the character wrote, finish the INCOMPLETE SENTENCE to sound like the character. \n-Do not be overly positive. Be realistic.\n-Write clearly and concisely."
+                system_instructions = f"INSTRUCTIONS\nFinish a sentence in the style of a character.\nCHARACTER DESCRIPTION:\n{character_description}.\n\nGiven the CONTEXT of what the character wrote, finish the INCOMPLETE SENTENCE to sound like the character. \n-Do not be overly positive or overly negative. Be realistic.\n-Write clearly,engagingly, and concisely."
 
             response = client.chat.completions.create(model=model,
                                                       messages=[{"role": "system", "content": system_instructions},
