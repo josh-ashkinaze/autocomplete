@@ -17,7 +17,7 @@ Note: When `hardcode_character_and_event` is false in the YAML file it defaults 
 
 ```bash
 git clone https://github.com/osh-ashkinaze/autocomplete.git
-cd auto
+cd autocomplete
 ```
 
 ### Build docker image
