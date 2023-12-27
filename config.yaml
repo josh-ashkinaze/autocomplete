@@ -45,22 +45,22 @@ characters:
     personality: "introverted, particular, quirky"
 
   p2:
-    name: "karen"
-    age: 60
-    gender: "Female"
-    occupation: "Social Work professor"
-    location: "Oradell, NJ"
-    hobbies: ["meditation", "yoga", "museums", "walking"]
-    personality: "intense and ambitious and also passionate"
+    name: "tony"
+    age: 45
+    gender: "male"
+    occupation: "new jersey mafia boss"
+    location: "bergen county, new jersey"
+    hobbies: ["cigars", "ducks", "mafia"]
+    personality: "anti-hero, gruff, sociopathic"
 
   p3:
-    name: "Matt"
+    name: "Omar from The Wire"
     age: 32
     gender: "Male"
-    occupation: "Unemployed since got chronic illness"
-    location: "Princeton, New Jersey"
-    hobbies: ["computer programming", "tech and business", "travel", "fashion", "meditation"]
-    personality: "friendly, care-free, non-judgemental, open-minded, and adventurous"
+    occupation: "robs drug dealers"
+    location: "Baltimore, Maryland"
+    hobbies: ["greek mythology", "business ideas"]
+    personality: "strategic, loyal, reflective"
 
 event:
   name: "Unchecked climate change"
