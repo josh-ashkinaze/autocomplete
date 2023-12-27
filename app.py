@@ -131,8 +131,8 @@ def get_chat_completion(character_description, event, event_effects, context, in
                                                                 {"role": "user",
                                                                  "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"}],
                                                       temperature=temperature, max_tokens=max_tokens, top_p=top_p)
-            print(system_instructions)
-            print(f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}")
+            #print(system_instructions)
+            #print(f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}")
 
             answer = json.loads(response.choices[0].json())['message']['content']
             return answer
@@ -143,53 +143,29 @@ def get_chat_completion(character_description, event, event_effects, context, in
 
 
 def remove_duplicated_completion(incomplete_sentence, completion):
-    """
-    Sometimes the LLM returns a completion that is a duplicate of the incomplete sentence. This function removes that duplication.
-    """
     if not incomplete_sentence or not completion:
-        return None
+        return completion
 
-    incomplete_sentence = normalize_spacing(incomplete_sentence.strip())
-    completion = normalize_spacing(completion.strip())
+    incomplete_sentence = incomplete_sentence.strip()
+    completion = completion.strip()
 
-    # Case 1: Starts With Overlap
-    # Incomplete sentence = But
-    # Completion = But I want to go
-    # Desired Completion = I want to go to
-    # Solution: Strip from the length of incomplete sentence onwards
+    # Case 1: Direct overlap
     if completion.startswith(incomplete_sentence):
         return completion[len(incomplete_sentence):].lstrip()
 
-    # Case 2: Total Overlap But Non-Starting
-    # Incomplete sentence = But I went to the mall
-    # Completion = went to the mall
-    # Desired Completion = None
-    # Solution: Check if the start of incomplete_sentence is the same as the completion
-    elif incomplete_sentence[:len(completion)] == completion:
-        return None
+    # Case 2: Completion is a subset of incomplete
+    elif incomplete_sentence.endswith(completion):
+        return ""
 
+    # Case 3: Non Direct Overlap
     else:
-        overlap_len = 0
-        for i in range(len(incomplete_sentence)):
-            if completion.startswith(incomplete_sentence[i:]):
-                overlap_len = len(incomplete_sentence) - i
-                break
+        for i in range(len(completion)):
+            if incomplete_sentence.endswith(completion[:i]):
+                return completion[i:].lstrip()
 
-        # Case 3: Non Direct Overlap
-        # Incomplete sentence = I just want to go
-        # Completion = just want to go to the store
-        # Desired Completion = to the store
-        # Solution: Remove the length of the overlap plus trailing space
-        if overlap_len > 0:
-            print("Case2")
-            return completion[overlap_len:].strip()
+        # Case 4: No overlap
+        return completion
 
-        # Case 4: No Overlap
-        # Incomplete sentence = Now I spend my days
-        # Completion = playing guitar
-        # Desired Completion = playing guitar
-        else:
-            return completion
 
 
 def normalize_spacing(text):
