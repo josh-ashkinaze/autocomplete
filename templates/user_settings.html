@@ -5,22 +5,21 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700&display=swap" rel="stylesheet">
     <style>
-       @keyframes backgroundMove {
-    0%, 100% {
-        background-position: 0% 0%;
-    }
-    50% {
-        background-position: 70% 70%;
-    }
-}
-
+        @keyframes backgroundMove {
+            0%, 100% {
+                background-position: 0% 0%;
+            }
+            50% {
+                background-position: 70% 70%;
+            }
+        }
 
 
         body {
             font-family: 'Roboto', sans-serif;
-       background: linear-gradient(124deg, #FFD1BA, #B2F9FC, #DCC7FF, #FFD1BA);
-    background-size: 200% 200%;
-    animation: backgroundMove 5s ease-in-out infinite;
+            background: linear-gradient(124deg, #FFD1BA, #B2F9FC, #DCC7FF, #FFD1BA);
+            background-size: 200% 200%;
+            animation: backgroundMove 7s ease-in-out infinite;
             color: #36454F;
             margin: 0;
             padding: 0;
@@ -94,8 +93,8 @@
 <body>
 <div class="container">
     <h2>Your Life But Different</h2>
-    <p class="lead">Write a diary entry with an AI editor that autocompletes your thoughts--as you--but if you
-        experienced a specific event. </p>
+    <p class="lead">Write a diary entry with an AI editor that autocompletes your thoughts, as you, but if you
+        experienced a specific event. Or simulate how another person or character would react. </p>
     <form method="post" action="{{ url_for('user_settings') }}" novalidate>
         {{ character_form.hidden_tag() }}
         {{ event_form.hidden_tag() }}
@@ -122,7 +121,10 @@
         {% for field in event_form if field.name != 'csrf_token' %}
             <div class="form-group">
                 {{ field.label(class="form-control-label") }}
-                {{ field(class="form-control", placeholder=field.description) }}
+                {% if field.type == 'TextAreaField' %}
+                    <textarea class="form-control" name="{{ field.name }}"
+                              placeholder="{{ field.render_kw.placeholder }}">{{ field._value() }}</textarea>
+                {% endif %}
                 {% if field.errors %}
                     <span class="text-danger">{{ field.errors|first }}</span>
                 {% endif %}
