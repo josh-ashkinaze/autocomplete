@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Text Editor with GPT Autocomplete</title>
+    <title>Text Editor with Autocomplete</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.19/lodash.min.js"></script>
@@ -45,9 +45,12 @@
     </style>
 </head>
 <body>
+
 <input type="hidden" id="debounce_time" value="{{ debounce_time }}">
 <input type="hidden" id="min_sentences" value="{{ min_sentences }}">
-<div contenteditable="true" data-placeholder="Start typing about a day in your life. For example, start with: 'I woke up and had breakfast'." id="editor" class="form-control"></div>
+<div contenteditable="true"
+     data-placeholder="Start typing about a day in your life. For example, start with: 'I woke up and had breakfast'."
+     id="editor" class="form-control"></div>
 
 
 <script>

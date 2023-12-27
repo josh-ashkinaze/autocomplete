@@ -92,15 +92,16 @@
 </head>
 <body>
 <div class="container">
-    <h2>Your Life But Different</h2>
-    <p class="lead">Write a diary entry with an AI editor that autocompletes your thoughts, as you, but if you
-        experienced a specific event. Or simulate how another person or character would react. </p>
+    <h2>Autocomplete an alternate you. </h2>
+    <p class="lead">How would an alternate "you" think? This tool autocompletes your thoughts, but set in a universe
+        where you experienced something entirely different. Simulate yourself or any character you want.</p>
+
     <form method="post" action="{{ url_for('user_settings') }}" novalidate>
         {{ character_form.hidden_tag() }}
         {{ event_form.hidden_tag() }}
 
         <h3>About You</h3>
-        <p class="lead">The more info you give, the better the simulation :)</p>
+        <p class="lead">Be specific and evocative. The more info you give, the better the simulation :)</p>
 
         {% for field in character_form if field.name != 'csrf_token' %}
             <div class="form-group">
@@ -117,7 +118,9 @@
             </div>
         {% endfor %}
 
-        <h3>Event/Scenario</h3>
+        <h3>What If This Happened</h3>
+        <p class="lead">Describe an event or scenario to drive the simulation.</p>
+
         {% for field in event_form if field.name != 'csrf_token' %}
             <div class="form-group">
                 {{ field.label(class="form-control-label") }}
