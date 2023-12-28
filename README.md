@@ -1,5 +1,5 @@
 # Description 
-A weird kind of AI-powered autocomplete text editor
+Co-write with a language model that autocompletes a character's thoughts in a given counterfactual scenario. 
 
 # Key Files
 - `app.py` is the main file that runs the web app
