@@ -1,5 +1,5 @@
 # Description 
-An AI-powered text editor that autocompletes a user's diary entries under a counterfactual scenario. This is useful for imagining how characters would react to different events (e.g: Tony Soprano in Covid) or how your own life would be different under different conditions. 
+A weird kind of AI-powered autocomplete text editor
 
 # Key Files
 - `app.py` is the main file that runs the web app
