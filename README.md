@@ -19,4 +19,6 @@ docker run -e OPENAI_KEY=your_openai_key -p 4000:80 myapp
 ```
 Replace `your_openai_key` with your actual OpenAI API key. Access the application at `http://localhost:4000`.
 
-.
+# ToDo
+- Add prompts for user if get stuck in text editor 
+- Log actions
