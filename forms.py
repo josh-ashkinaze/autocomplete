@@ -13,7 +13,7 @@ class CharacterForm(FlaskForm):
     hobbies = TextAreaField('Hobbies', validators=[DataRequired()],
                             render_kw={"placeholder": "What do you like to do? List some activities. Ex: origami, paint, meditate"})
     personality = TextAreaField('Personality', validators=[DataRequired(), Length(max=200)], render_kw={
-        "placeholder": "How would you describe yourself? For example, list three adjectives or what you think would be on your tombstone."})
+        "placeholder": "What's your personality like? Starters: list three adjectives, what you think would be on your tombstone, or how your friends would describe you."})
 
 
 class EventForm(FlaskForm):

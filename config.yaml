@@ -1,20 +1,20 @@
 # If true we read character and event
 # from the config.yaml file. Else,
 # display a form to the user to fill out
-hardcode_character_and_event: false
+hardcode_character_and_event: true
 
 # If true it displays a maintenance page when running on prod
 app_is_offline: false
 
 openai:
   model: "gpt-3.5-turbo"
-  temperature_min: 0.6
-  temperature_max: 0.8
-  max_tokens_min: 15
+  temperature_min: 0.8
+  temperature_max: 1.2
+  max_tokens_min: 10
   max_tokens_max: 20
   top_p: 1
   max_attempts: 2
-  frequency_penalty: 0.5
+  frequency_penalty: 1
 
 autocomplete:
   # The deboucne time (ms) is the spacing between calls (d=800)
@@ -64,6 +64,6 @@ characters:
     personality: "strategic, loyal, reflective"
 
 event:
-  name: "climate change"
+  name: "falling into crippling medical debt due to a chronic illness"
   effects:
   effects_generator_model: "gpt-3.5-turbo" # The model used to generate the effects
