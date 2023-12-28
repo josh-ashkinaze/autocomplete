@@ -67,3 +67,15 @@ event:
   name: "falling into crippling medical debt due to a chronic illness"
   effects:
   effects_generator_model: "gpt-3.5-turbo" # The model used to generate the effects
+
+
+stuck_prompts:
+  - "How did you start your day?"
+  - "What was the highlight of your day?"
+  - "What was the lowlight of your day?"
+  - "Did anything unexpected happen today?"
+  - "Choose one particular moment and describe it using five senses."
+  - "Write about a conversation you had."
+  - "Describe a quiet moment you had."
+  - "Describe a loud moment you had."
+  - "Describe a mundane task you did today"

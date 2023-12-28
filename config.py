@@ -56,6 +56,7 @@ class AppConfig:
         self.debounce_time = self.config['autocomplete']['debounce_time']
         self.min_sentences = self.config['autocomplete']['min_sentences']
         self.event_relevant = self.config['autocomplete']['event_relevant']
+        self.stuck_prompts = self.config['stuck_prompts']
         assert self.min_sentences >= 1, "min_sentences must be at least 1"
         assert self.event_relevant > 0 and self.event_relevant <= 1, "min_sentences must be in (0, 1]"
 

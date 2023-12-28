@@ -51,11 +51,20 @@
 <div contenteditable="true"
      data-placeholder="Start typing about a day in your life. Then an AI will autocomplete your thoughts. Press tab to accept suggestions or any key to reject them. Some ways to start: 'I woke up and had breakfast. Then I went to work.'"
      id="editor" class="form-control"></div>
-
+<button onclick="showRandomPrompt()">I'm Stuck</button>
 
 <script>
     var debounce_time = parseInt(document.getElementById('debounce_time').value);
     var min_sentences = parseInt(document.getElementById('min_sentences').value);
+    var prompts = {{ stuck_prompts | tojson | safe }};
+
+    // Function to show a random prompt
+    function showRandomPrompt() {
+        var randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+        alert(randomPrompt); // Display the prompt
+    }
+
+
 
     $(document).ready(function () {
         var editor = $('#editor');

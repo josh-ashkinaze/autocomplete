@@ -19,3 +19,4 @@ class CharacterForm(FlaskForm):
 class EventForm(FlaskForm):
     event = TextAreaField('Event', validators=[DataRequired(), Length(max=100)], render_kw={
         "placeholder": "What is the event that should happen? Ex: unchecked climate change, winning the lottery, losing a lottery ticket"})
+

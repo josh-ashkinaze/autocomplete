@@ -31,13 +31,15 @@ def initial():
         session['character_description'] = app_config.character_description
         session['event_name'] = app_config.event['name']
         session['event_description'] = app_config.event_description
-        print(session)
         return redirect(url_for('index'))
 
 
 @app.route('/index')
 def index():
-    return render_template('index.html', debounce_time=app_config.debounce_time, min_sentences=app_config.min_sentences)
+    return render_template('index.html',
+                           debounce_time=app_config.debounce_time,
+                           min_sentences=app_config.min_sentences,
+                           stuck_prompts=app_config.stuck_prompts)
 
 
 @app.route('/autocomplete', methods=['GET', 'POST'])
