@@ -2,9 +2,13 @@
 <html>
 <head>
     <title>Text Editor with Autocomplete</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.19/lodash.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         body {
@@ -16,8 +20,31 @@
             margin: 0;
         }
 
-        #editor {
+        .btn-primary {
+            background-color: #DCC7FF; /* Light purple background */
+            border: none;
+            padding: 10px 20px;
+            color: black;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            color: black;
+
+            background-color: #FFD1BA; /* Peach color on hover */
+        }
+
+        .editor-container {
             width: 60%; /* Adjust width as needed */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #editor {
             min-height: 80vh; /* Large vertical height */
             padding: 2em;
             border: 2px solid #dee2e6;
@@ -42,20 +69,92 @@
             font-style: italic;
         }
 
+        .stuck-button {
+            margin-top: 1em; /* Adds some space between the editor and the button */
+        }
+
+        .copy-button {
+            margin-top: 1em; /* Adds some space between the editor and the button */
+        }
+
     </style>
 </head>
 <body>
 
 <input type="hidden" id="debounce_time" value="{{ debounce_time }}">
 <input type="hidden" id="min_sentences" value="{{ min_sentences }}">
-<div contenteditable="true"
-     data-placeholder="Start typing about a day in your life. Then an AI will autocomplete your thoughts. Press tab to accept suggestions or any key to reject them. Some ways to start: 'I woke up and had breakfast. Then I went to work.'"
-     id="editor" class="form-control"></div>
+
+<div class="editor-container">
+    <div contenteditable="true"
+         data-placeholder="Start typing about a day in your life. Then an AI will autocomplete your thoughts. Press tab to accept suggestions or any key to reject them. Some ways to start: 'I woke up and had breakfast. Then I went to work.'"
+         id="editor" class="form-control"></div>
 
 
+    <!-- Combined button row -->
+    <div class="button-row">
+        <!-- Share Story Button -->
+        <button type="button" class="btn btn-primary copy-button" onclick="copyText()">
+            <i class="fa fa-share"></i> Share Story
+        </button>
+        <!-- Help. I'm stuck! Button -->
+        <button type="button" class="btn btn-primary stuck-button" onclick="showRandomPrompt()">
+            <i class="fa fa-question-circle"></i> Help. I'm stuck!
+        </button>
+    </div>
+</div>
+
+
+<!-- Bootstrap Modal -->
+<div class="modal" id="promptModal" tabindex="-1" role="dialog" aria-labelledby="promptModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="promptModalLabel">Random Prompt</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Okay">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- The random prompt will be displayed here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     var debounce_time = parseInt(document.getElementById('debounce_time').value);
     var min_sentences = parseInt(document.getElementById('min_sentences').value);
+    var prompts = {{ stuck_prompts | tojson | safe }};
+
+
+    function copyText() {
+        var textToCopy = "Here's a story I made with https://autocomplete-production.up.railway.app!\n\n" + document.getElementById('editor').innerText;
+
+
+        navigator.clipboard.writeText(textToCopy).then(function () {
+            Swal.fire({
+                title: 'Nice!',
+                text: 'Story copied to clipboard.',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+            });
+        }).catch(function (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Could not copy the story.',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+        });
+    }
+
+    function showRandomPrompt() {
+        var randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+        $('#promptModal .modal-body').text(randomPrompt); // Set the text of the modal body
+        $('#promptModal').modal('show'); // Display the modal
+    }
 
     $(document).ready(function () {
         var editor = $('#editor');

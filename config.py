@@ -17,6 +17,7 @@ class AppConfig:
         self.temperature_range = (self.config['openai']['temperature_min'], self.config['openai']['temperature_max'])
         self.token_range = (self.config['openai']['max_tokens_min'], self.config['openai']['max_tokens_max'])
         self.top_p = self.config['openai']['top_p']
+        self.frequency_penalty = self.config['openai']['frequency_penalty']
         self.max_attempts = self.config['openai']['max_attempts']
         self.openai_key = os.getenv('OPENAI_KEY')
         if not self.openai_key:
@@ -56,6 +57,7 @@ class AppConfig:
         self.debounce_time = self.config['autocomplete']['debounce_time']
         self.min_sentences = self.config['autocomplete']['min_sentences']
         self.event_relevant = self.config['autocomplete']['event_relevant']
+        self.stuck_prompts = self.config['stuck_prompts']
         assert self.min_sentences >= 1, "min_sentences must be at least 1"
         assert self.event_relevant > 0 and self.event_relevant <= 1, "min_sentences must be in (0, 1]"
 
