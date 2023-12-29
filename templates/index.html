@@ -5,6 +5,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.19/lodash.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
 
     <style>
         body {
@@ -48,23 +49,48 @@
 
 <input type="hidden" id="debounce_time" value="{{ debounce_time }}">
 <input type="hidden" id="min_sentences" value="{{ min_sentences }}">
+
+
+
+
 <div contenteditable="true"
      data-placeholder="Start typing about a day in your life. Then an AI will autocomplete your thoughts. Press tab to accept suggestions or any key to reject them. Some ways to start: 'I woke up and had breakfast. Then I went to work.'"
      id="editor" class="form-control"></div>
-<button onclick="showRandomPrompt()">I'm Stuck</button>
+
+
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="promptModal" tabindex="-1" role="dialog" aria-labelledby="promptModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="promptModalLabel">Random Prompt</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- The random prompt will be displayed here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<button type="button" class="btn btn-primary" onclick="showRandomPrompt()">I'm Stuck</button>
 
 <script>
     var debounce_time = parseInt(document.getElementById('debounce_time').value);
     var min_sentences = parseInt(document.getElementById('min_sentences').value);
     var prompts = {{ stuck_prompts | tojson | safe }};
 
-    // Function to show a random prompt
-    function showRandomPrompt() {
-        var randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-        alert(randomPrompt); // Display the prompt
-    }
-
-
+function showRandomPrompt() {
+    var randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+    $('#promptModal .modal-body').text(randomPrompt); // Set the text of the modal body
+    $('#promptModal').modal('show'); // Display the modal
+}
 
     $(document).ready(function () {
         var editor = $('#editor');

@@ -64,7 +64,8 @@ def autocomplete():
     full_word_completion = normalize_spacing(extract_complete_words(completion_no_prompt))
     de_duped_completion = normalize_spacing(remove_duplicated_completion(incomplete_sentence, full_word_completion))
     d = {'text': text, 'context': context, 'incomplete_sentence': incomplete_sentence, 'completion': completion,
-         'full_word_completion': full_word_completion, 'de_duped_completion': de_duped_completion, 'completion_no_prompt': completion_no_prompt}
+         'full_word_completion': full_word_completion, 'de_duped_completion': de_duped_completion,
+         'completion_no_prompt': completion_no_prompt}
     print(d)
     return jsonify(completion=de_duped_completion)
 
@@ -166,7 +167,6 @@ def remove_duplicated_completion(incomplete_sentence, completion):
 
         # Case 4: No overlap
         return completion
-
 
 
 def normalize_spacing(text):
