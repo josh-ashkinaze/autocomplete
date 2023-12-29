@@ -67,9 +67,14 @@
             font-style: italic;
         }
 
-        .stuck-button {
+  .stuck-button {
             margin-top: 1em; /* Adds some space between the editor and the button */
         }
+
+   .copy-button {
+            margin-top: 1em; /* Adds some space between the editor and the button */
+        }
+
     </style>
 </head>
 <body>
@@ -80,11 +85,12 @@
 <div class="editor-container">
     <div contenteditable="true" data-placeholder="Start typing about a day in your life..." id="editor" class="form-control"></div>
 
+    <!-- Combined button row -->
     <div class="button-row">
+        <!-- Share Story Button -->
         <button type="button" class="btn btn-primary copy-button" onclick="copyText()">Share Story</button>
-    </div>
 
-    <div class="button-row">
+        <!-- Help. I'm stuck! Button -->
         <button type="button" class="btn btn-primary stuck-button" onclick="showRandomPrompt()">Help. I'm stuck!</button>
     </div>
 </div>
