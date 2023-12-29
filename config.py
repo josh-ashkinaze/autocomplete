@@ -17,6 +17,7 @@ class AppConfig:
         self.temperature_range = (self.config['openai']['temperature_min'], self.config['openai']['temperature_max'])
         self.token_range = (self.config['openai']['max_tokens_min'], self.config['openai']['max_tokens_max'])
         self.top_p = self.config['openai']['top_p']
+        self.frequency_penalty = self.config['openai']['frequency_penalty']
         self.max_attempts = self.config['openai']['max_attempts']
         self.openai_key = os.getenv('OPENAI_KEY')
         if not self.openai_key:
