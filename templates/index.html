@@ -17,8 +17,14 @@
             margin: 0;
         }
 
-        #editor {
+        .editor-container {
             width: 60%; /* Adjust width as needed */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #editor {
             min-height: 80vh; /* Large vertical height */
             padding: 2em;
             border: 2px solid #dee2e6;
@@ -43,6 +49,9 @@
             font-style: italic;
         }
 
+        .stuck-button {
+            margin-top: 1em; /* Adds some space between the editor and the button */
+        }
     </style>
 </head>
 <body>
@@ -50,21 +59,21 @@
 <input type="hidden" id="debounce_time" value="{{ debounce_time }}">
 <input type="hidden" id="min_sentences" value="{{ min_sentences }}">
 
+<div class="editor-container">
+    <div contenteditable="true"
+         data-placeholder="Start typing about a day in your life. Then an AI will autocomplete your thoughts. Press tab to accept suggestions or any key to reject them. Some ways to start: 'I woke up and had breakfast. Then I went to work.'"
+         id="editor" class="form-control"></div>
 
-
-
-<div contenteditable="true"
-     data-placeholder="Start typing about a day in your life. Then an AI will autocomplete your thoughts. Press tab to accept suggestions or any key to reject them. Some ways to start: 'I woke up and had breakfast. Then I went to work.'"
-     id="editor" class="form-control"></div>
-
+    <button type="button" class="btn btn-primary stuck-button" onclick="showRandomPrompt()">Help. I'm stuck!</button>
+</div>
 
 <!-- Bootstrap Modal -->
-<div class="modal fade" id="promptModal" tabindex="-1" role="dialog" aria-labelledby="promptModalLabel" aria-hidden="true">
+<div class="modal" id="promptModal" tabindex="-1" role="dialog" aria-labelledby="promptModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="promptModalLabel">Random Prompt</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Okay">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -77,10 +86,6 @@
     </div>
   </div>
 </div>
-
-
-<button type="button" class="btn btn-primary" onclick="showRandomPrompt()">I'm Stuck</button>
-
 <script>
     var debounce_time = parseInt(document.getElementById('debounce_time').value);
     var min_sentences = parseInt(document.getElementById('min_sentences').value);
