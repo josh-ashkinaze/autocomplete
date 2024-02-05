@@ -85,6 +85,7 @@ def user_settings():
             session['character_description'] = construct_character_description(character_form)
             session['event_name'] = event_form.event.data
             session['event_description'] = get_dynamic_effects(session['character_description'], session['event_name'])
+            #session['event_description] =  get_dynamic_effects(app_config['experiment_event])
             return redirect(url_for('index'))
         else:
             flash('Please correct the errors in the form.', 'error')

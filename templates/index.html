@@ -161,6 +161,10 @@
         var originalText = '';
         var suggestion = '';
         var suggestionAccepted = false;
+        var lastKeystrokeTime = 0; // Variable to store the timestamp of the last keystroke
+        var timeSinceLastKeystroke = Date.now() + 4000;
+        var currentTime;
+
 
         function isMiddleOfSentence(text) {
             return !/[\.\?\!\:\;]\s$/.test(text);
@@ -171,7 +175,11 @@
         }
 
         var debouncedAutocomplete = _.debounce(function () {
-            if (isMiddleOfSentence(originalText) && countSentences(originalText) >= min_sentences) {
+            var currentTime = Date.now(); // Get the current time
+            timeSinceLastKeystroke = currentTime - lastKeystrokeTime; // Calculate the time since the last keystroke
+            console.log(timeSinceLastKeystroke);
+            if (isMiddleOfSentence(originalText) && countSentences(originalText) >= min_sentences
+                && timeSinceLastKeystroke > 500) {
                 triggerAutocomplete();
             }
         }, debounce_time);
@@ -187,7 +195,10 @@
 
         editor.on('input', function () {
             originalText = $(this).text();
+            
             debouncedAutocomplete();
+
+            lastKeystrokeTime = Date.now();
         });
 
         function triggerAutocomplete() {
