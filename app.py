@@ -25,6 +25,10 @@ app.config['SECRET_KEY'] = app_config.flask_secret_key
 def initial():
     if app_config.is_offline and app_config.is_prod:
         return render_template('offline.html'), 503  # HTTP 503 Service Unavailable
+    if app_config.experiment_enabled and not app_config.hardcoded:
+        session['event_name'] = app_config.event['name']
+        session['event_description'] = app_config.event_description
+        return redirect(url_for('user_settings_experiment'))
     if not app_config.hardcoded:  # Ask user to create character and event
         return redirect(url_for('user_settings'))
     else:  # Use hardcoded character and event
@@ -91,6 +95,22 @@ def user_settings():
             flash('Please correct the errors in the form.', 'error')
     elif request.method == 'GET':
         return render_template('user_settings.html', character_form=character_form, event_form=event_form)
+    
+    
+@app.route('/user_settings_experiment', methods=['GET', 'POST'])
+def user_settings_experiment():
+    character_form = CharacterForm()
+    if request.method == 'POST':
+        if character_form.validate_on_submit():
+            flash('Character created successfully!', 'success')
+            session['character_description'] = construct_character_description(character_form)
+            session['event_name'] = app_config.event['name']
+            session['event_description'] =  get_dynamic_effects(session['character_description'], app_config.event['name'])
+            return redirect(url_for('index'))
+        else:
+            flash('Please correct the errors in the form.', 'error')
+    elif request.method == 'GET':
+        return render_template('user_settings_experiment.html', character_form=character_form)
 
 
 def get_dynamic_effects(character_description, event_description, attempt_no=0, max_attempts=2):

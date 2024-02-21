@@ -161,9 +161,6 @@
         var originalText = '';
         var suggestion = '';
         var suggestionAccepted = false;
-        var lastKeystrokeTime = 0; // Variable to store the timestamp of the last keystroke
-        var timeSinceLastKeystroke = Date.now() + 4000;
-        var currentTime;
 
 
         function isMiddleOfSentence(text) {
@@ -176,10 +173,7 @@
 
         var debouncedAutocomplete = _.debounce(function () {
             var currentTime = Date.now(); // Get the current time
-            timeSinceLastKeystroke = currentTime - lastKeystrokeTime; // Calculate the time since the last keystroke
-            console.log(timeSinceLastKeystroke);
-            if (isMiddleOfSentence(originalText) && countSentences(originalText) >= min_sentences
-                && timeSinceLastKeystroke > 500) {
+            if (isMiddleOfSentence(originalText) && countSentences(originalText) >= min_sentences ) {
                 triggerAutocomplete();
             }
         }, debounce_time);
@@ -193,12 +187,9 @@
             placeCaretAtEnd(editor.get(0));
         }
 
-        editor.on('input', function () {
+        editor.on('input', function (e) {
             originalText = $(this).text();
-            
             debouncedAutocomplete();
-
-            lastKeystrokeTime = Date.now();
         });
 
         function triggerAutocomplete() {

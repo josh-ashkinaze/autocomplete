@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Person Character Creation</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700&display=swap" rel="stylesheet">
+    <style>
+        @keyframes backgroundMove {
+            0%, 100% {
+                background-position: 0% 0%;
+            }
+            50% {
+                background-position: 70% 70%;
+            }
+        }
+
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(124deg, #FFD1BA, #B2F9FC, #DCC7FF, #FFD1BA);
+            background-size: 200% 200%;
+            animation: backgroundMove 7s ease-in-out infinite;
+            color: #36454F;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #FFFFFF;
+            padding: 50px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 850px;
+        }
+
+        h2, h3 {
+            text-align: left;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            border: 1px solid #DCC7FF;
+            border-radius: 20px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #FFD1BA;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background-color: #DCC7FF;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #B2F9FC;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                max-width: 90%;
+            }
+
+            .form-control {
+                font-size: 14px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Autocomplete As An Alternate You </h2>
+    <p class="lead">How would an alternate "you" think? Write with an AI text editor that autocompletes your thoughts, in a universe
+        where you experienced something entirely different. Simulate yourself or any character.</p>
+
+    <form method="post" action="{{ url_for('user_settings_experiment') }}" novalidate>
+        {{ character_form.hidden_tag() }}
+
+        <h3>About You</h3>
+        <p class="lead">The more info you give, the better the simulation :)</p>
+
+        {% for field in character_form if field.name != 'csrf_token' %}
+            <div class="form-group">
+                {{ field.label(class="form-control-label") }}
+                {% if field.type == 'TextAreaField' %}
+                    <textarea class="form-control" name="{{ field.name }}"
+                              placeholder="{{ field.render_kw.placeholder }}">{{ field._value() }}</textarea>
+                {% else %}
+                    {{ field(class="form-control") }}
+                {% endif %}
+                {% if field.errors %}
+                    <span class="text-danger">{{ field.errors|first }}</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+         <!-- Modified Submit Button with Spinner -->
+    <button type="submit" class="btn btn-primary" id="submit-button">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;" id="spinner"></span>
+        Submit
+    </button>
+    </form>
+</div>
+
+
+<script>
+    document.getElementById('submit-button').addEventListener('click', function() {
+        document.getElementById('spinner').style.display = 'inline-block'; // Show spinner
+        this.childNodes[2].nodeValue = ' Loading the simulation...'; // Change button text
+    });
+</script>
+
+</body>
+</html>

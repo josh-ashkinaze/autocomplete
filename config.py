@@ -9,6 +9,7 @@ class AppConfig:
     def __init__(self, config_file='config.yaml'):
         self.config = self.load_yaml_config(config_file)
         self.hardcoded = self.config['hardcode_character_and_event']
+        self.experiment_enabled = self.config['enable_experiment']
 
         # ################################
         # OpenAI settings
@@ -19,7 +20,7 @@ class AppConfig:
         self.top_p = self.config['openai']['top_p']
         self.frequency_penalty = self.config['openai']['frequency_penalty']
         self.max_attempts = self.config['openai']['max_attempts']
-        self.openai_key = os.getenv('OPENAI_KEY')
+        self.openai_key = os.getenv('OPENAI_KEY')        
         if not self.openai_key:
             raise ValueError(
                 "OPENAI_KEY environment variable not set. "
@@ -39,6 +40,11 @@ class AppConfig:
             self.character_description = self.construct_character_description()
             self.event_description = self.get_dynamic_effects()
             print(self.event_description)
+        elif self.experiment_enabled:
+            self.event = self.config['event']
+            self.event_description = self.get_dynamic_effects()
+            print(self.event_description)
+            
         else:
             #raise NotImplementedError("Dynamic character and event creation is WIP")
             pass
