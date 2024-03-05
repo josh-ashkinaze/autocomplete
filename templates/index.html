@@ -172,7 +172,6 @@
         }
 
         var debouncedAutocomplete = _.debounce(function () {
-            var currentTime = Date.now(); // Get the current time
             if (isMiddleOfSentence(originalText) && countSentences(originalText) >= min_sentences ) {
                 triggerAutocomplete();
             }
@@ -187,7 +186,7 @@
             placeCaretAtEnd(editor.get(0));
         }
 
-        editor.on('input', function (e) {
+        editor.on('input', function () {
             originalText = $(this).text();
             debouncedAutocomplete();
         });
@@ -220,6 +219,7 @@
                 suggestionAccepted = true;
             } else if (!suggestionAccepted) {
                 suggestion = ''; // Clear suggestion on other key presses
+                updateEditorText();
             }
         });
 
