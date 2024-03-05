@@ -1,7 +1,7 @@
 # If true we read character and event
 # from the config.yaml file. Else,
 # display a form to the user to fill out
-hardcode_character_and_event: true
+hardcode_character_and_event: false
 
 enable_experiment: true
 
