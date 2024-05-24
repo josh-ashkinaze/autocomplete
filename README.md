@@ -12,10 +12,10 @@ Note: When `hardcode_character_and_event` is true in the YAML file  it will read
 # Run Locally 
 
 ```bash
-git clone https://github.com/josh-ashkinaze/autocomplete.git
+git clone https://github.com/osh-ashkinaze/autocomplete.git
 cd autocomplete
 docker build -t myapp .
-docker run -e OPENAI_KEY=your_openai_key -p 4000:4000 myapp
+docker run -e OPENAI_KEY=your_openai_key -p 4000:80 myapp
 ```
 Replace `your_openai_key` with your actual OpenAI API key. Access the application at `http://localhost:4000`.
 
