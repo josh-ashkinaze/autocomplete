@@ -3,7 +3,7 @@
 # display a form to the user to fill out
 hardcode_character_and_event: false
 
-enable_experiment: false
+enable_experiment: true
 
 # If true it displays a maintenance page when running on prod
 app_is_offline: false
