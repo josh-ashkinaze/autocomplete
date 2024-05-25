@@ -159,7 +159,7 @@ def get_chat_completion(character_description, event, event_effects, context, in
             print(system_instructions)
             print(f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}")
 
-            answer = json.loads(response.choices[0].json())['message']['content']
+            answer = json.loads(response.choices[0].model_dump_json())['message']['content']            
             return answer
         except Exception as e:
             return get_chat_completion(context=context, incomplete_sentence=incomplete_sentence, model=model,
