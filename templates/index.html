@@ -175,7 +175,6 @@
 
         var debouncedAutocomplete = _.debounce(function () {
             if (isMiddleOfSentence(originalText) && countSentences(originalText) >= min_sentences ) {
-                console.log("autocomplete triggered");
                 triggerAutocomplete();
             }
         }, debounce_time);
@@ -190,7 +189,6 @@
         }
 
         editor.on('input', function () {
-            console.log("input");
             originalText = $(this).text();
             console.log(originalText);
             if (originalText.trim().length - last_updated > 5){
@@ -219,7 +217,6 @@
         }
 
         editor.on('keydown', function (e) {
-            console.log("keydown");
             if (e.keyCode === 9 && suggestion) {  // Tab key
                 e.preventDefault();
                 originalText += suggestion;
