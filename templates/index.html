@@ -162,6 +162,8 @@
         var suggestion = '';
         var suggestionAccepted = false;
 
+        var last_updated = 0;
+
 
         function isMiddleOfSentence(text) {
             return !/[\.\?\!\:\;]\s$/.test(text);
@@ -173,6 +175,7 @@
 
         var debouncedAutocomplete = _.debounce(function () {
             if (isMiddleOfSentence(originalText) && countSentences(originalText) >= min_sentences ) {
+                console.log("autocomplete triggered");
                 triggerAutocomplete();
             }
         }, debounce_time);
@@ -187,8 +190,13 @@
         }
 
         editor.on('input', function () {
+            console.log("input");
             originalText = $(this).text();
-            debouncedAutocomplete();
+            console.log(originalText);
+            if (originalText.trim().length - last_updated > 5){
+                debouncedAutocomplete();
+            }
+            
         });
 
         function triggerAutocomplete() {
@@ -211,9 +219,11 @@
         }
 
         editor.on('keydown', function (e) {
+            console.log("keydown");
             if (e.keyCode === 9 && suggestion) {  // Tab key
                 e.preventDefault();
                 originalText += suggestion;
+                last_updated = originalText.length;
                 suggestion = '';
                 updateEditorText();
                 suggestionAccepted = true;
