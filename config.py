@@ -5,7 +5,6 @@ import os
 import secrets
 from litellm import completion
 
-
 class AppConfig:
     def __init__(self, config_file='config.yaml'):
         self.config = self.load_yaml_config(config_file)
@@ -35,12 +34,19 @@ class AppConfig:
             print(f"Anthropic model detected. Adjusting temperature range to {self.temperature_range}")
 
         for key in ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY']:
-            if not os.getenv(key):
-                print(f"{key} environment variable not set. "
-                      f"To set it:\n"
-                      f"- On macOS or Linux, use: export {key}=\"key\"\n"
-                      f"- On Windows (PowerShell), use: $env:{key}=\"key\""
-                      f"\nReplace 'key' with your actual API key.")
+            # if model has 'gpt' in it ensure openai key else if 'claude' enssure anthropic
+            if "gpt" in self.model.lower() and not os.getenv('OPENAI_API_KEY'):
+                raise ValueError(f"{key} environment variable not set. "
+                                 f"To set it:\n"
+                                 f"- On macOS or Linux, use: export {key}=\"key\"\n"
+                                 f"- On Windows (PowerShell), use: $env:{key}=\"key\""
+                                 f"\nReplace 'key' with your actual API key.")
+            elif "claude" in self.model.lower() and not os.getenv('ANTHROPIC_API_KEY'):
+                raise ValueError(f"{key} environment variable not set. "
+                                 f"To set it:\n"
+                                 f"- On macOS or Linux, use: export {key}=\"key\"\n"
+                                 f"- On Windows (PowerShell), use: $env:{key}=\"key\""
+                                 f"\nReplace 'key' with your actual API key.")
 
         self.client = OpenAI(api_key=self.openai_key)
         self.event_constraints = "\n" + "\n-".join(self.config['autocomplete']['constraints'])
@@ -103,13 +109,13 @@ class AppConfig:
         else:
             try:
                 client = self.client
-                response = completion(model=self.effects_generator_model,
+                response = client.chat.completions.create(model=self.effects_generator_model,
                                                           messages=[
                                                               {"role": "system",
                                                                "content": "You are a helpful, factual, and highly specific assistant."},
                                                               {"role": "user",
                                                                "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {self.event['name'].lower()} on this person. 
-                         Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic, specific, and concrete. Be concrete. Answer in 50 words.
+                         Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic, specific, and concrete. Be concrete. Answer in 100 words.
                         DESCRIPTION:
                         {self.character_description}"""}],
                                                           temperature=0.8, max_tokens=200, top_p=1)
