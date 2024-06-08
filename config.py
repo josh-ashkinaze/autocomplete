@@ -3,6 +3,7 @@ import json
 from openai import OpenAI
 import os
 import secrets
+from litellm import completion
 
 
 class AppConfig:
@@ -12,24 +13,39 @@ class AppConfig:
         self.experiment_enabled = self.config['enable_experiment']
 
         # ################################
-        # OpenAI settings
+        # LLM settings
         # ################################
-        self.model = self.config['openai']['model']
-        self.temperature_range = (self.config['openai']['temperature_min'], self.config['openai']['temperature_max'])
-        self.token_range = (self.config['openai']['max_tokens_min'], self.config['openai']['max_tokens_max'])
-        self.top_p = self.config['openai']['top_p']
-        self.frequency_penalty = self.config['openai']['frequency_penalty']
-        self.max_attempts = self.config['openai']['max_attempts']
-        self.openai_key = os.getenv('OPENAI_KEY')        
-        if not self.openai_key:
-            raise ValueError(
-                "OPENAI_KEY environment variable not set. "
-                "To set it:\n"
-                "- On macOS or Linux, use: export OPENAI_KEY=\"your_openai_key_here\"\n"
-                "- On Windows (PowerShell), use: $env:OPENAI_KEY=\"your_openai_key_here\""
-                "\nReplace 'your_openai_key_here' with your actual OpenAI API key."
-            )
+
+        # Default settings are for gpt models
+        self.effects_generator_model = self.config['event']['effects_generator_model']
+        self.model = self.config['llm']['model']
+        self.temperature_range = (self.config['llm']['temperature_min'], self.config['llm']['temperature_max'])
+        self.token_range = (self.config['llm']['max_tokens_min'], self.config['llm']['max_tokens_max'])
+        self.top_p = self.config['llm']['top_p']
+        self.frequency_penalty = self.config['llm']['frequency_penalty']
+        self.max_attempts = self.config['llm']['max_attempts']
+        self.openai_key = os.getenv('OPENAI_API_KEY')
+        self.anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
+
+        # Change settings for Anthropic
+        # OPENAI temperature is in [0,2] and Anthropic is in [0,1]
+        if "claude" in self.model.lower():
+            self.frequency_penalty = None
+            self.temperature_range = (min(self.config['llm']['temperature_min'],0), min(self.config['llm']['temperature_max'],1))
+            print(f"Anthropic model detected. Adjusting temperature range to {self.temperature_range}")
+
+        for key in ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY']:
+            if not os.getenv(key):
+                print(f"{key} environment variable not set. "
+                      f"To set it:\n"
+                      f"- On macOS or Linux, use: export {key}=\"key\"\n"
+                      f"- On Windows (PowerShell), use: $env:{key}=\"key\""
+                      f"\nReplace 'key' with your actual API key.")
+
         self.client = OpenAI(api_key=self.openai_key)
+        self.event_constraints = "\n" + "\n-".join(self.config['autocomplete']['constraints'])
+        self.non_event_constraints = "\n" + "-\n".join(x for x in self.config['autocomplete']['constraints']if "{event}" not in x)
+
 
         # ################################
         # Character and event settings
@@ -87,13 +103,13 @@ class AppConfig:
         else:
             try:
                 client = self.client
-                response = client.chat.completions.create(model="gpt-3.5-turbo",
+                response = completion(model=self.effects_generator_model,
                                                           messages=[
                                                               {"role": "system",
                                                                "content": "You are a helpful, factual, and highly specific assistant."},
                                                               {"role": "user",
                                                                "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {self.event['name'].lower()} on this person. 
-                         Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic and specific. Do not exaggerate. Answer in 50 words.
+                         Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic, specific, and concrete. Be concrete. Answer in 50 words.
                         DESCRIPTION:
                         {self.character_description}"""}],
                                                           temperature=0.8, max_tokens=200, top_p=1)

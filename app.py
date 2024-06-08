@@ -10,6 +10,7 @@ import json
 import random
 import re
 import string
+from litellm import completion
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 
@@ -119,13 +120,13 @@ def get_dynamic_effects(character_description, event_description, attempt_no=0, 
     else:
         try:
             client = app_config.client
-            response = client.chat.completions.create(model="gpt-3.5-turbo", messages=[
+            response = completion(model=app_config.effects_generator_model, messages=[
                 {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
                 {"role": "user",
                  "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {event_description} on this person. 
-                     Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic and specific. Do not exaggerate.
+                     Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be concrete, realistic and specific. Do not exaggerate. Write 100 words.
                     DESCRIPTION:
-                    {character_description}"""}], temperature=0.6, max_tokens=250, top_p=1)
+                    {character_description}"""}], temperature=0.6, max_tokens=1000, top_p=1)
             answer = json.loads(response.choices[0].json())['message']['content']
             return answer
         except Exception as e:
@@ -148,10 +149,10 @@ def get_chat_completion(character_description, event, event_effects, context, in
         try:
             client = app_config.client
             if include_event:
-                system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence in the style of a CHARACTER who is affected by {event} and feeling the effects of this event.\n\nCHARACTER\n{character_description}\nEVENT\n{event}\nEVENT EFFECTS\n{event_effects}.\n\nCONSTRAINTS\n-Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE in the style of the character, affected by the event.\n- Use clear, plain, simple language that a simple person would use.\n- Everything you write should be highly realistic and not imaginative.\n-Do not be overly emotional. Be realistic."
+                system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence in the style of a CHARACTER who is affected by {event} and feeling the effects of this event.\n\nCHARACTER\n{character_description}\nEVENT\n{event}\nEVENT EFFECTS\n{event_effects}.\n\nCONSTRAINTS{app_config.event_constraints}"
             else:
-                system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence in the style of the CHARACTER.\n\nCHARACTER\n{character_description}\n\nCONSTRAINTS\n-Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE in the style of the character.\n- Use clear, plain, simple language that a simple person would use.\n- Everything you write should be highly realistic and not imaginative.\n-Do not be overly emotional. Be realistic."
-            response = client.chat.completions.create(model=model,
+                system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence in the style of the CHARACTER.\n\nCHARACTER\n{character_description}\n\nCONSTRAINTS{app_config.non_event_constraints}"
+            response = completion(model=model,
                                                       messages=[{"role": "system", "content": system_instructions},
                                                                 {"role": "user",
                                                                  "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"}],
