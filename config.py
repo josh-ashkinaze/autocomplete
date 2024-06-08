@@ -55,6 +55,8 @@ class AppConfig:
             self.character = self.config['characters']['p1']
             self.character_description = self.construct_character_description()
             self.event_description = self.get_dynamic_effects()
+            self.event_constraints = self.event_constraints.replace("{event}", self.event)
+
             print(self.event_description)
         elif self.experiment_enabled:
             self.event = self.config['event']
