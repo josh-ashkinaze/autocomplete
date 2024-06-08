@@ -120,7 +120,7 @@ def get_dynamic_effects(character_description, event_description, attempt_no=0, 
     else:
         try:
             client = app_config.client
-            response = completion(model=app_config.effects_generator_model, messages=[
+            response = client.chat.completions.create(model=app_config.effects_generator_model, messages=[
                 {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
                 {"role": "user",
                  "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {event_description} on this person. 
