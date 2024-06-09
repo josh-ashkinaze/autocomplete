@@ -27,4 +27,4 @@ Replace `your_openai_key` with your actual OpenAI API key. Access the applicatio
 # Links
 
 - Production: https://autocomplete.up.railway.app/user_settings
-- Staging: https://autocomplete-staging.up.railway.app/user_settings_experiment
+- Staging: https://autocomplete-staging.up.railway.app/user_settings
