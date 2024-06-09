@@ -24,3 +24,7 @@ docker run -e OPENAI_API_KEY=your_openai_key -p 4000:5000 myapp
 Replace `your_openai_key` with your actual OpenAI API key. Access the application at `http://localhost:4000`.
 
 
+# Links
+
+- Production: https://autocomplete.up.railway.app/user_settings
+- Staging: https://autocomplete-staging.up.railway.app/user_settings_experiment
