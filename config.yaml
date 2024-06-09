@@ -7,7 +7,7 @@
 # display a form to the user to fill out
 hardcode_character_and_event: false
 
-enable_experiment: false
+enable_experiment: true
 
 # If true it displays a maintenance page when running on prod
 app_is_offline: false
@@ -18,14 +18,14 @@ app_is_offline: false
 ####################################
 
 llm:
-  model: "gpt-4o"
+  model: "gpt-3.5-turbo"
   temperature_min: 0.8
-  temperature_max: 1.2
+  temperature_max: 2
   max_tokens_min: 10
   max_tokens_max: 30
   top_p: 1
   max_attempts: 2
-  frequency_penalty: 1
+  frequency_penalty: 2
 
 autocomplete:
   # The deboucne time (ms) is the spacing between calls (d=800)
@@ -41,11 +41,12 @@ autocomplete:
 
   # Instructions for completions
   constraints:
-  - "Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE in the style of the character."
-  - "SHOW, do not TELL, how {event} event would affect the person. Be vivid and descriptive."
-  - "Use clear, plain, simple language that a very simple person would use."
+  - "Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE as the character."
+  - "SHOW, do not TELL, how {event} event would affect the person. Describe surroundings and actions very specifically."
+  - "Use clear, plain, simple language that a very simple and plain person would use."
   - "Everything you write should be about CONCRETE things and actions, not feelings and emotions. Be CONCRETE and not ABSTRACT."
-  - "Write like Ernest Hemingway."
+  - "Write like Ernest Hemingway: short, simple, and to the point."
+  - "This character is a sociopath who has no emotions and no feelings so only describe concrete things."
 
 
 ####################################
@@ -83,9 +84,9 @@ characters:
     personality: "strategic, loyal, reflective"
 
 event:
-  name: "falling into crippling medical debt due to a chronic illness"
+  name: "falling into medical debt due to a chronic illness"
   effects:
-  effects_generator_model: "gpt-4o" # The model used to generate the effects
+  effects_generator_model: "gpt-4-turbo" # The model used to generate the effects
 
 
 stuck_prompts:
