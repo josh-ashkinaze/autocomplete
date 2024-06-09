@@ -20,16 +20,16 @@ app_is_offline: false
 llm:
   model: "gpt-3.5-turbo"
   temperature_min: 0.8
-  temperature_max: 2
+  temperature_max: 1.5
   max_tokens_min: 10
   max_tokens_max: 30
   top_p: 1
   max_attempts: 2
-  frequency_penalty: 2
+  frequency_penalty: 1
 
 autocomplete:
   # The deboucne time (ms) is the spacing between calls (d=800)
-  debounce_time: 700
+  debounce_time: 600
 
   # How many sentences (d=1) to require the user to write before we start auto-complete
   # It has to be >= 1 because we need to know the context of the sentence
@@ -45,8 +45,8 @@ autocomplete:
   - "SHOW, do not TELL, how {event} event would affect the person. Describe surroundings and actions very specifically."
   - "Use clear, plain, simple language that a very simple and plain person would use."
   - "Everything you write should be about CONCRETE things and actions, not feelings and emotions. Be CONCRETE and not ABSTRACT."
-  - "Write like Ernest Hemingway: short, simple, and to the point."
-  - "This character is a sociopath who has no emotions and no feelings so only describe concrete things."
+  - "This character has no emotions and no feelings so only describe CONCRETE things."
+  - "Be very concrete."
 
 
 ####################################
