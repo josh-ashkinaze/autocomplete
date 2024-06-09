@@ -149,9 +149,9 @@ def get_chat_completion(character_description, event, event_effects, context, in
         try:
             client = app_config.client
             if include_event:
-                system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence in the style of a CHARACTER who is affected by {event} and feeling the effects of this event.\n\nCHARACTER\n{character_description}\nEVENT\n{event}\nEVENT EFFECTS\n{event_effects}.\n\nCONSTRAINTS{app_config.event_constraints}"
+                system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence as if you were the CHARACTER affected by {event}.\n\nCHARACTER\n{character_description}\nEVENT\n{event}\nEVENT EFFECTS\n{event_effects}.\n\nCONSTRAINTS{app_config.event_constraints}"
             else:
-                system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence in the style of the CHARACTER.\n\nCHARACTER\n{character_description}\n\nCONSTRAINTS{app_config.non_event_constraints}"
+                system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence as if you were the CHARACTER.\n\nCHARACTER\n{character_description}\n\nCONSTRAINTS{app_config.non_event_constraints}"
             response = completion(model=model,
                                                       messages=[{"role": "system", "content": system_instructions},
                                                                 {"role": "user",
