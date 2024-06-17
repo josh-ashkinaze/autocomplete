@@ -66,7 +66,7 @@ def autocomplete():
                             context=context, incomplete_sentence=incomplete_sentence,
                             temperature=temperature,
                             frequency_penalty=app_config.frequency_penalty,
-                            max_tokens=random.randint(*app_config.token_range), top_p=app_config.top_p))
+                            max_tokens=random.randint(*app_config.token_range)))
     completion_no_prompt = remove_prompt_words(completion)
     full_word_completion = normalize_spacing(extract_complete_words(completion_no_prompt))
     de_duped_completion = normalize_spacing(remove_duplicated_completion(incomplete_sentence, full_word_completion))
@@ -142,7 +142,7 @@ def construct_character_description(form):
 # FUNCTIONS FOR PROCESSING TEXT
 ############################################################
 def get_chat_completion(character_description, event, event_effects, context, incomplete_sentence, model, temperature,
-                        max_tokens, top_p, include_event, frequency_penalty=0, attempt_no=0, max_attempts=1):
+                        max_tokens, include_event, frequency_penalty=0, attempt_no=0, max_attempts=1):
     if attempt_no > max_attempts:
         return None
     else:
@@ -156,7 +156,7 @@ def get_chat_completion(character_description, event, event_effects, context, in
                                                       messages=[{"role": "system", "content": system_instructions},
                                                                 {"role": "user",
                                                                  "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"}],
-                                                      temperature=temperature, max_tokens=max_tokens, top_p=top_p)
+                                                      temperature=temperature, max_tokens=max_tokens)
             print(system_instructions)
             print(f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}")
 
@@ -164,7 +164,7 @@ def get_chat_completion(character_description, event, event_effects, context, in
             return answer
         except Exception as e:
             return get_chat_completion(context=context, incomplete_sentence=incomplete_sentence, model=model,
-                                       temperature=temperature, max_tokens=max_tokens, top_p=top_p,frequency_penalty=frequency_penalty,
+                                       temperature=temperature, max_tokens=max_tokens,frequency_penalty=frequency_penalty,
                                        include_event=include_event, attempt_no=attempt_no + 1, max_attempts=2)
 
 
