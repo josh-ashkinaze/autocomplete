@@ -46,6 +46,7 @@ autocomplete:
         - "Everything you write should be about CONCRETE things and actions, not feelings and emotions. Be CONCRETE and not ABSTRACT."
         - "Write like Ernest Hemingway."
         - "Be very concrete."
+        - "DO NOT include ANYTHING beside the added tokens to the INCOMPLETE SENTENCE in your output. DO NOT INCLUDE THE CONTEXT IN YOUR OUPUT"
 
 ####################################
 # Hardcoded characters and event
