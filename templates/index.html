@@ -232,10 +232,10 @@
 			        if (e.keyCode === 9 && suggestion) {  // Tab key
 			            e.preventDefault();
 			            // console.log(originalText[originalText.length-1]);
-			            if (!/\s/.test(originalText[originalText.length-1])) { // Check if a white space character
-			                console.log("detected no space");
-			                originalText += ' ';
-			            }
+			            if (!/\s/.test(originalText[originalText.length-1]) && !/[!.,;?:]/.test(suggestion[0])) {
+			 				console.log("Last character is not a space and first character of suggestion is not a punctuation");
+			 				originalText += ' ';
+						}
 			            originalText += suggestion;
 			            last_updated = originalText.length;
 			            suggestion = '';
