@@ -1,0 +1,89 @@
+@keyframes backgroundMove {
+	0%,
+	100% {
+		background-position: 0% 0%;
+	}
+	50% {
+		background-position: 70% 70%;
+	}
+}
+
+body {
+	font-family: "Roboto", sans-serif;
+	background: linear-gradient(124deg, #ffd1ba, #b2f9fc, #dcc7ff, #ffd1ba);
+	background-size: 200% 200%;
+	animation: backgroundMove 7s ease-in-out infinite;
+	color: #36454f;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+}
+
+h2 {
+	background: linear-gradient(124deg, #fa8c43, #7acff6, #9c80fc, #ff9a57);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.container {
+	background: #ffffff;
+	padding: 50px;
+	border-radius: 10px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	width: 100%;
+	max-width: 850px;
+}
+
+h2,
+h3 {
+	text-align: left;
+	font-weight: 400;
+	margin-bottom: 20px;
+}
+
+.form-group {
+	margin-bottom: 15px;
+}
+
+.form-control {
+	border: 1px solid #dcc7ff;
+	border-radius: 20px;
+	font-size: 16px;
+	transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+	border-color: #ffd1ba;
+	box-shadow: none;
+}
+
+.btn-primary {
+	background-color: #dcc7ff;
+	border: none;
+	color: white;
+	padding: 10px 20px;
+	font-size: 16px;
+	border-radius: 4px;
+	width: 100%;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+	background-color: #b2f9fc;
+}
+
+@media (max-width: 768px) {
+	.container {
+		padding: 15px;
+		max-width: 90%;
+	}
+
+	.form-control {
+		font-size: 14px;
+	}
+}
