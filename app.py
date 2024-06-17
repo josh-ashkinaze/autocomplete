@@ -176,7 +176,12 @@ def remove_duplicated_completion(incomplete_sentence, completion):
     completion = completion.strip()
 
     # Case 1: Direct overlap
+
+    # Case 1a (same case):
     if completion.startswith(incomplete_sentence):
+        return completion[len(incomplete_sentence):].lstrip()
+    # Case 1b (different case):
+    elif completion.lower().startswith(incomplete_sentence.lower()):
         return completion[len(incomplete_sentence):].lstrip()
 
     # Case 2: Completion is a subset of incomplete
