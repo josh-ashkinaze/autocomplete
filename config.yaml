@@ -17,9 +17,9 @@ app_is_offline: false
 ####################################
 
 llm:
-    model: "gpt-3.5-turbo"
-    temperature_min: 0.8
-    temperature_max: 1.5
+    model: "gpt-4o"
+    temperature_min: 1.0
+    temperature_max: 1.8
     max_tokens_min: 10
     max_tokens_max: 30
     top_p: 1
@@ -46,6 +46,7 @@ autocomplete:
         - "Everything you write should be about CONCRETE things and actions, not feelings and emotions. Be CONCRETE and not ABSTRACT."
         - "This character has no emotions and no feelings so only describe CONCRETE things."
         - "Be very concrete."
+        - "DO NOT include ANYTHING beside the added tokens to the INCOMPLETE SENTENCE in your output. DO NOT INCLUDE THE CONTEXT IN YOUR OUPUT"
 
 ####################################
 # Hardcoded characters and event
