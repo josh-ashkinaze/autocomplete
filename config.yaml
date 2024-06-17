@@ -41,11 +41,12 @@ autocomplete:
     constraints:
         - "Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE as the character."
         - "SHOW, do not TELL, how {event} event would affect the person. Describe surroundings and actions very specifically."
-        - "Use clear, plain, simple language that a very simple and plain person would use."
         - "Everything you write should be about CONCRETE things and actions, not feelings and emotions. Be CONCRETE and not ABSTRACT."
         - "Be very concrete."
-        - "DO NOT include ANYTHING beside the added tokens to the INCOMPLETE SENTENCE in your output. DO NOT INCLUDE THE CONTEXT IN YOUR OUPUT"
+        - "Use clear, plain, simple language that a very simple and plain person would use."
         - "Write like Ernest Hemingway."
+        - "DO NOT include ANYTHING beside the added tokens to the INCOMPLETE SENTENCE in your output. DO NOT INCLUDE THE CONTEXT IN YOUR OUPUT"
+
 
 ####################################
 # Hardcoded characters and event
@@ -60,7 +61,7 @@ characters:
         gender: "Female"
         occupation: "College Student"
         location: "Vermont"
-        hobbies: ["Watching baseball", "listening to maccabeats", "eating nutella"]
+        hobbies: ["Watching baseball", "listening to the maccabeats", "eating nutella", "scrolling tiktok"]
         personality: "introverted, particular, quirky"
 
     p2:
