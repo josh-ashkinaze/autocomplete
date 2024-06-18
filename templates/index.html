@@ -84,11 +84,16 @@
 			}
 		</style>
 	</head>
+	
 	<body>
 		<input type="hidden" id="debounce_time" value="{{ debounce_time }}" />
 		<input type="hidden" id="min_sentences" value="{{ min_sentences }}" />
 
+		
 		<div class="editor-container">
+			<p>
+				Imagine {{predicted_event}} happened to you.
+			</p>
 			<div
 				contenteditable="true"
 				data-placeholder="Start typing about a day in your life. Then an AI will autocomplete your thoughts. Press tab to accept suggestions or any key to reject them. Some ways to start: 'I woke up and had breakfast. Then I went to work.'"

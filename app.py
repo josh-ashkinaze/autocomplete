@@ -41,10 +41,21 @@ def initial():
 
 @app.route('/index')
 def index():
+    client = app_config.client
+    response = client.chat.completions.create(model=app_config.effects_generator_model, messages=[
+        {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
+        {"role": "user",
+            "content": f"""INSTRUCTIONS\nGiven a description of a person, return a realistic scenario that would cause this person to experience {session['event_description']}. 
+                Be very specific and very realistic. Do not exaggerate. Write 20-30 words. DO NOT write about the effect of this event, but only focus on the scenario and how 
+                that would make them experience {session['event_description']}. Return one such event. Write in first person.
+            DESCRIPTION:
+            {session['character_description']}"""}], temperature=0.6, max_tokens=1000, top_p=1)
+    predicted = json.loads(response.choices[0].json())['message']['content']
     return render_template('index.html',
                            debounce_time=app_config.debounce_time,
                            min_sentences=app_config.min_sentences,
-                           stuck_prompts=app_config.stuck_prompts)
+                           stuck_prompts=app_config.stuck_prompts,
+                           predicted_event = predicted)
 
 
 @app.route('/autocomplete', methods=['GET', 'POST'])
