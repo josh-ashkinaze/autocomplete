@@ -39,6 +39,12 @@
 				<button type="button" class="btn btn-primary stuck-button" onclick="showRandomPrompt()">
 					<i class="fa fa-question-circle"></i> Help. I'm stuck!
 				</button>
+
+				<!-- Return to home Button 
+				Data will be saved to database in returnToHome function -->
+				<button type="button" class="btn btn-primary home-button" onclick="returnToHome()">
+					<i class="fa fa-home"></i> Return to Home
+				</button>
 			</div>
 		</div>
 
@@ -73,6 +79,9 @@
 			var min_sentences = parseInt(document.getElementById('min_sentences').value);
 			var prompts = {{ stuck_prompts | tojson | safe }};
 
+			function returnToHome() {
+			 	window.location.href = '/';
+			}
 
 			function copyText() {
 			    var textToCopy = "Here's a story I made with https://autocomplete-production.up.railway.app!\n\n" + document.getElementById('editor').innerText;

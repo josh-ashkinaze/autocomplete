@@ -21,7 +21,7 @@
 				or any character.
 			</p>
 
-			<form method="post" action="{{ url_for('user_settings') }}" novalidate>
+			<form id="form1" method="post" action="{{ url_for('user_settings') }}">
 				{{ character_form.hidden_tag() }} {{ event_form.hidden_tag() }}
 				<br />
 				<h3>About You</h3>
@@ -71,15 +71,15 @@
 						style="display: none"
 						id="spinner"
 					></span>
-					Submit
+					<span id="submit-button-text">Submit</span>
 				</button>
 			</form>
 		</div>
 
 		<script>
-			document.getElementById("submit-button").addEventListener("click", function () {
+			document.getElementById("form1").addEventListener("submit", function () {
+				document.getElementById("submit-button-text").textContent = "Loading the simulation..."; // Change button text
 				document.getElementById("spinner").style.display = "inline-block"; // Show spinner
-				this.childNodes[2].nodeValue = " Loading the simulation..."; // Change button text
 			});
 		</script>
 	</body>
