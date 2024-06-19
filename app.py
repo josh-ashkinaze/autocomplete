@@ -24,6 +24,11 @@ app.config['SECRET_KEY'] = app_config.flask_secret_key
 
 @app.route('/')
 def initial():
+    '''
+    Initialize application. Route to user_setting in no experimenting mode with hardcode 
+    persona turned off. Route directly to index with hardcode turned on and all effects 
+    applied as specified in yaml.
+    '''
     if app_config.is_offline and app_config.is_prod:
         return render_template('offline.html'), 503  # HTTP 503 Service Unavailable
     if app_config.experiment_enabled and not app_config.hardcoded:
@@ -41,6 +46,7 @@ def initial():
 
 @app.route('/index')
 def index():
+    '''Returns rendered template'''
     return render_template('index.html',
                            debounce_time=app_config.debounce_time,
                            min_sentences=app_config.min_sentences,
