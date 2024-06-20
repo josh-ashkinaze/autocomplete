@@ -17,6 +17,8 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from config import AppConfig
 from forms import CharacterForm, EventForm
 
+import mongo_util
+
 app = Flask(__name__)
 app_config = AppConfig()
 app.config['SECRET_KEY'] = app_config.flask_secret_key
@@ -92,6 +94,7 @@ def user_settings():
     event_form = EventForm()
     if request.method == 'POST':
         if character_form.validate_on_submit() and event_form.validate_on_submit():
+            save_form_data(character_form, event_form)
             flash('Character and event created successfully!', 'success')
             session['character_description'] = construct_character_description(character_form)
             session['event_name'] = event_form.event.data
@@ -119,6 +122,16 @@ def user_settings_experiment():
     elif request.method == 'GET':
         return render_template('user_settings_experiment.html', character_form=character_form)
 
+@app.route('/insert_data')
+def insert_data():
+    print("---------------->")
+    print("SENDING USER SESSION DATA TO DB")
+
+    # Code Refactor is needed to avoid hard coding Mongo_WORKING_STAGE_URL
+    # Instead, read the railway environment and select url base on that.
+    # Messing with the config.py will be needed. 
+    mongo_util.insert_to_database("user-data", "MONGO_WORKING_STAGE_URL",session["user_info"])
+    return redirect(url_for('user_settings'))
 
 def get_dynamic_effects(character_description, event_description, attempt_no=0, max_attempts=2):
     if attempt_no > max_attempts:
@@ -140,10 +153,23 @@ def get_dynamic_effects(character_description, event_description, attempt_no=0, 
             return get_dynamic_effects(character_description, event_description, attempt_no + 1, max_attempts)
 
 
+
 def construct_character_description(form):
     return f"I am {form.age.data} years old from {form.location.data}, working as a {form.occupation.data}. My hobbies include {form.hobbies.data}. My friends describe me as {form.personality.data}."
 
-
+def save_form_data(character_form, event_form):
+    '''
+    Save original form data to session. Used later on for inserting user data to DB.
+    '''
+    user_info = {
+        "age": character_form.age.data,
+        "location": character_form.location.data,
+        "occupation": character_form.occupation.data,
+        "hobbies": character_form.hobbies.data,
+        "personality": character_form.personality.data,
+        "event" : event_form.event.data
+    }
+    session['user_info'] = user_info
 ############################################################
 # FUNCTIONS FOR PROCESSING TEXT
 ############################################################
