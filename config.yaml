@@ -86,7 +86,7 @@ characters:
 event:
   name: "falling into medical debt due to a chronic illness"
   effects:
-  effects_generator_model: "gpt-4-turbo" # The model used to generate the effects
+  effects_generator_model: "gpt-4o" # The model used to generate the effects
 
 
 stuck_prompts:
