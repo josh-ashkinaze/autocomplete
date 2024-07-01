@@ -50,7 +50,8 @@ def index():
     return render_template('index.html',
                            debounce_time=app_config.debounce_time,
                            min_sentences=app_config.min_sentences,
-                           stuck_prompts=app_config.stuck_prompts)
+                           stuck_prompts=app_config.stuck_prompts,
+                           predicted_event = session['predicted_event'])
 
 
 @app.route('/autocomplete', methods=['GET', 'POST'])
@@ -96,6 +97,7 @@ def user_settings():
             session['character_description'] = construct_character_description(character_form)
             session['event_name'] = event_form.event.data
             session['event_description'] = get_dynamic_effects(session['character_description'], session['event_name'])
+            get_predicted_event()
             #session['event_description] =  get_dynamic_effects(app_config['experiment_event])
             return redirect(url_for('index'))
         else:
@@ -119,6 +121,18 @@ def user_settings_experiment():
     elif request.method == 'GET':
         return render_template('user_settings_experiment.html', character_form=character_form)
 
+def get_predicted_event():
+    client = app_config.client
+    response = client.chat.completions.create(model=app_config.effects_generator_model, messages=[
+        {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
+        {"role": "user",
+            "content": f"""INSTRUCTIONS\nGiven a description of a person, return a realistic scenario that would cause this person to experience {session['event_description']}. 
+                Be very specific and very realistic. Do not exaggerate. Write 20-30 words. DO NOT write about the effect of this event, but only focus on the scenario and how 
+                that would make them experience {session['event_description']}. Return one such event. Write in second person.
+            DESCRIPTION:
+            {session['character_description']}"""}], temperature=0.6, max_tokens=1000, top_p=1)
+    
+    session['predicted_event'] = json.loads(response.choices[0].json())['message']['content']
 
 def get_dynamic_effects(character_description, event_description, attempt_no=0, max_attempts=2):
     if attempt_no > max_attempts:

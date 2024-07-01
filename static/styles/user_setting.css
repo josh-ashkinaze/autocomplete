@@ -87,3 +87,9 @@ h3 {
 		font-size: 14px;
 	}
 }
+
+
+
+textarea.form-control {
+	height: 100px;
+}
