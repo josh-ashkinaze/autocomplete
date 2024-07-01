@@ -20,7 +20,6 @@ class AppConfig:
         self.model = self.config['llm']['model']
         self.temperature_range = (self.config['llm']['temperature_min'], self.config['llm']['temperature_max'])
         self.token_range = (self.config['llm']['max_tokens_min'], self.config['llm']['max_tokens_max'])
-        self.top_p = self.config['llm']['top_p']
         self.frequency_penalty = self.config['llm']['frequency_penalty']
         self.max_attempts = self.config['llm']['max_attempts']
         self.openai_key = os.getenv('OPENAI_API_KEY')

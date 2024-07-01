@@ -17,11 +17,16 @@
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	</head>
+	
 	<body>
 		<input type="hidden" id="debounce_time" value="{{ debounce_time }}" />
 		<input type="hidden" id="min_sentences" value="{{ min_sentences }}" />
 
+		
 		<div class="editor-container">
+			<p>
+				<b>Imagine this is how it started: </b>{{predicted_event}}.
+			</p>
 			<div
 				contenteditable="true"
 				data-placeholder="Start typing about a day in your life. Then an AI will autocomplete your thoughts. Press tab to accept suggestions or any key to reject them. Some ways to start: 'I woke up and had breakfast. Then I went to work.'"

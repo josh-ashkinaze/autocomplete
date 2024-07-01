@@ -22,7 +22,6 @@ llm:
     temperature_max: 1.8
     max_tokens_min: 10
     max_tokens_max: 30
-    top_p: 1
     max_attempts: 2
     frequency_penalty: 1
 

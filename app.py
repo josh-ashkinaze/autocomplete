@@ -50,7 +50,8 @@ def index():
     return render_template('index.html',
                            debounce_time=app_config.debounce_time,
                            min_sentences=app_config.min_sentences,
-                           stuck_prompts=app_config.stuck_prompts)
+                           stuck_prompts=app_config.stuck_prompts,
+                           predicted_event = session['predicted_event'])
 
 
 @app.route('/autocomplete', methods=['GET', 'POST'])
@@ -72,7 +73,7 @@ def autocomplete():
                             context=context, incomplete_sentence=incomplete_sentence,
                             temperature=temperature,
                             frequency_penalty=app_config.frequency_penalty,
-                            max_tokens=random.randint(*app_config.token_range), top_p=app_config.top_p))
+                            max_tokens=random.randint(*app_config.token_range)))
     completion_no_prompt = remove_prompt_words(completion)
     full_word_completion = normalize_spacing(extract_complete_words(completion_no_prompt))
     de_duped_completion = normalize_spacing(remove_duplicated_completion(incomplete_sentence, full_word_completion))
@@ -96,6 +97,7 @@ def user_settings():
             session['character_description'] = construct_character_description(character_form)
             session['event_name'] = event_form.event.data
             session['event_description'] = get_dynamic_effects(session['character_description'], session['event_name'])
+            get_predicted_event()
             #session['event_description] =  get_dynamic_effects(app_config['experiment_event])
             return redirect(url_for('index'))
         else:
@@ -119,6 +121,18 @@ def user_settings_experiment():
     elif request.method == 'GET':
         return render_template('user_settings_experiment.html', character_form=character_form)
 
+def get_predicted_event():
+    client = app_config.client
+    response = client.chat.completions.create(model=app_config.effects_generator_model, messages=[
+        {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
+        {"role": "user",
+            "content": f"""INSTRUCTIONS\nGiven a description of a person, return a realistic scenario that would cause this person to experience {session['event_description']}. 
+                Be very specific and very realistic. Do not exaggerate. Write 20-30 words. DO NOT write about the effect of this event, but only focus on the scenario and how 
+                that would make them experience {session['event_description']}. Return one such event. Write in second person.
+            DESCRIPTION:
+            {session['character_description']}"""}], temperature=0.6, max_tokens=1000, top_p=1)
+    
+    session['predicted_event'] = json.loads(response.choices[0].json())['message']['content']
 
 def get_dynamic_effects(character_description, event_description, attempt_no=0, max_attempts=2):
     if attempt_no > max_attempts:
@@ -148,7 +162,7 @@ def construct_character_description(form):
 # FUNCTIONS FOR PROCESSING TEXT
 ############################################################
 def get_chat_completion(character_description, event, event_effects, context, incomplete_sentence, model, temperature,
-                        max_tokens, top_p, include_event, frequency_penalty=0, attempt_no=0, max_attempts=1):
+                        max_tokens, include_event, frequency_penalty=0, attempt_no=0, max_attempts=1):
     if attempt_no > max_attempts:
         return None
     else:
@@ -162,7 +176,7 @@ def get_chat_completion(character_description, event, event_effects, context, in
                                                       messages=[{"role": "system", "content": system_instructions},
                                                                 {"role": "user",
                                                                  "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"}],
-                                                      temperature=temperature, max_tokens=max_tokens, top_p=top_p)
+                                                      temperature=temperature, max_tokens=max_tokens)
             print(system_instructions)
             print(f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}")
 
@@ -170,7 +184,7 @@ def get_chat_completion(character_description, event, event_effects, context, in
             return answer
         except Exception as e:
             return get_chat_completion(context=context, incomplete_sentence=incomplete_sentence, model=model,
-                                       temperature=temperature, max_tokens=max_tokens, top_p=top_p,frequency_penalty=frequency_penalty,
+                                       temperature=temperature, max_tokens=max_tokens,frequency_penalty=frequency_penalty,
                                        include_event=include_event, attempt_no=attempt_no + 1, max_attempts=2)
 
 
