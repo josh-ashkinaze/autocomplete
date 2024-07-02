@@ -5,49 +5,47 @@
 # If true we read character and event
 # from the config.yaml file. Else,
 # display a form to the user to fill out
-hardcode_character_and_event: false
+hardcode_character_and_event: true
 
 enable_experiment: false
 
 # If true it displays a maintenance page when running on prod
 app_is_offline: false
 
-
 ####################################
 # Completion settings
 ####################################
 
 llm:
-  model: "gpt-3.5-turbo"
-  temperature_min: 0.8
-  temperature_max: 1.5
-  max_tokens_min: 10
-  max_tokens_max: 30
-  top_p: 1
-  max_attempts: 2
-  frequency_penalty: 1
+    model: "gpt-4o"
+    temperature_min: 0.5
+    temperature_max: 1.5
+    max_tokens_min: 10
+    max_tokens_max: 30
+    max_attempts: 2
+    frequency_penalty: 1
 
 autocomplete:
-  # The deboucne time (ms) is the spacing between calls (d=800)
-  debounce_time: 600
+    # The deboucne time (ms) is the spacing between calls (d=800)
+    debounce_time: 600
 
-  # How many sentences (d=1) to require the user to write before we start auto-complete
-  # It has to be >= 1 because we need to know the context of the sentence
-  min_sentences: 1
+    # How many sentences (d=1) to require the user to write before we start auto-complete
+    # It has to be >= 1 because we need to know the context of the sentence
+    min_sentences: 1
 
-  # What proportion (d=0.7) of auto-completes should be relevant to the event. Lower than 1 to keep
-  # not so heavy haanded
-  event_relevant: 0.8
+    # What proportion (d=0.7) of auto-completes should be relevant to the event. Lower than 1 to keep
+    # not so heavy haanded
+    event_relevant: 0.8
 
-  # Instructions for completions
-  constraints:
-  - "Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE as the character."
-  - "SHOW, do not TELL, how {event} event would affect the person. Describe surroundings and actions very specifically."
-  - "Use clear, plain, simple language that a very simple and plain person would use."
-  - "Everything you write should be about CONCRETE things and actions, not feelings and emotions. Be CONCRETE and not ABSTRACT."
-  - "This character has no emotions and no feelings so only describe CONCRETE things."
-  - "Be very concrete."
-
+    # Instructions for completions
+    constraints:
+        - "Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE as the character."
+        - "SHOW, do not TELL, how  the {EVENT} would affect the person. Describe surroundings and actions very specifically."
+        - "Use clear, plain, simple language that a very simple and plain person would use."
+        - "Everything you write should be about CONCRETE things and actions, not feelings and emotions. Be CONCRETE and not ABSTRACT."
+        - "Be very concrete."
+        - "Do not include the incomplete sentence in your response."
+        - "Write like Ernest Hemingway."
 
 ####################################
 # Hardcoded characters and event
@@ -56,46 +54,45 @@ autocomplete:
 # These are hardcoded values for testing and will only be used if
 # hardcode_character_and_event is set to true
 characters:
-  p1:
-    name: "eliana"
-    age: 23
-    gender: "Female"
-    occupation: "College Student"
-    location: "Vermont"
-    hobbies: ["Watching baseball", "listening to maccabeats", "eating nutella"]
-    personality: "introverted, particular, quirky"
+    p1:
+        name: "eliana"
+        age: 23
+        gender: "Female"
+        occupation: "College Student"
+        location: "Vermont"
+        hobbies: ["Watching baseball", "listening to maccabeats", "eating nutella"]
+        personality: "introverted, particular, quirky"
 
-  p2:
-    name: "tony"
-    age: 45
-    gender: "male"
-    occupation: "new jersey mafia boss"
-    location: "bergen county, new jersey"
-    hobbies: ["cigars", "ducks", "mafia"]
-    personality: "anti-hero, gruff, sociopathic"
+    p2:
+        name: "tony"
+        age: 45
+        gender: "male"
+        occupation: "new jersey mafia boss"
+        location: "bergen county, new jersey"
+        hobbies: ["cigars", "ducks", "mafia"]
+        personality: "anti-hero, gruff, sociopathic"
 
-  p3:
-    name: "Omar from The Wire"
-    age: 32
-    gender: "Male"
-    occupation: "robs drug dealers"
-    location: "Baltimore, Maryland"
-    hobbies: ["greek mythology", "business ideas"]
-    personality: "strategic, loyal, reflective"
+    p3:
+        name: "Omar from The Wire"
+        age: 32
+        gender: "Male"
+        occupation: "robs drug dealers"
+        location: "Baltimore, Maryland"
+        hobbies: ["greek mythology", "business ideas"]
+        personality: "strategic, loyal, reflective"
 
 event:
-  name: "falling into medical debt due to a chronic illness"
-  effects:
-  effects_generator_model: "gpt-4o" # The model used to generate the effects
-
+    name: "falling into medical debt due to a chronic illness"
+    effects:
+    effects_generator_model: "gpt-4o" # The model used to generate the effects
 
 stuck_prompts:
-  - "How did you start your day?"
-  - "What was the highlight of your day?"
-  - "What was the lowlight of your day?"
-  - "Did anything unexpected happen today?"
-  - "Choose one particular moment and describe it using five senses."
-  - "Write about a conversation you had."
-  - "Describe a quiet moment you had."
-  - "Describe a loud moment you had."
-  - "Describe a mundane task you did today"
+    - "How did you start your day?"
+    - "What was the highlight of your day?"
+    - "What was the lowlight of your day?"
+    - "Did anything unexpected happen today?"
+    - "Choose one particular moment and describe it using five senses."
+    - "Write about a conversation you had."
+    - "Describe a quiet moment you had."
+    - "Describe a loud moment you had."
+    - "Describe a mundane task you did today"
