@@ -152,9 +152,9 @@ def get_predicted_event(character_description, event_name):
                 f"INSTRUCTIONS\n"
                 f"Given a description of a person, return a realistic scenario that would cause this person to experience {event_name}. "
                 f"Be very specific and very realistic. Do not exaggerate. Write 20-30 words. DO NOT write about the effect of this event, but only focus on the scenario and how "
-                f"that would make them experience {character_description}. Return one such event. Write in second person.\n"
+                f"that would make them experience {event_name}. Return one such event. Write in second person.\n"
                 f"DESCRIPTION:\n"
-                f"{event_name}"
+                f"{character_description}"
             )}
         ],
         temperature=0.6,
