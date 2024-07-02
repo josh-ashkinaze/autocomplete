@@ -11,9 +11,11 @@ class CharacterForm(FlaskForm):
     location = StringField('Location', validators=[DataRequired(), Length(max=100)],
                            render_kw={"placeholder": "What region or city are you living in? Ex: the fun part of Iowa"})
     hobbies = TextAreaField('Interests or Hobbies', validators=[DataRequired()],
-                            render_kw={"placeholder": "What do you like or like to do? List some interests or activities. Ex: new wave music, origami, paint, meditate"})
+                            render_kw={
+                                "placeholder": "What do you like or like to do? List some interests or activities. Ex: hiking, painting, reading, yoga, cooking, traveling, photography, playing guitar, gardening, running, baking, watching movies"})
     personality = TextAreaField('Personality', validators=[DataRequired(), Length(max=200)], render_kw={
-        "placeholder": "What are you like as a person? List some adjectives, what you think would be on your tombstone, or how your friends would describe you."})
+        "placeholder": "What are you like as a person? Think of how your friends would describe you or some adjectives you identify with. Possible adjectives: introverted/extroverted, organized/disorganized, anxious/calm, open-minded/closed-minded, agreeable/disagreeable"
+    })
 
 
 class EventForm(FlaskForm):

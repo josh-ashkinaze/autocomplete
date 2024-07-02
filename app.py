@@ -11,6 +11,7 @@ import random
 import re
 import string
 from litellm import completion
+from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 
@@ -24,6 +25,11 @@ app.config['SECRET_KEY'] = app_config.flask_secret_key
 
 @app.route('/')
 def initial():
+    '''
+    Initialize application. Route to user_setting in no experimenting mode with hardcode 
+    persona turned off. Route directly to index with hardcode turned on and all effects 
+    applied as specified in yaml.
+    '''
     if app_config.is_offline and app_config.is_prod:
         return render_template('offline.html'), 503  # HTTP 503 Service Unavailable
     if app_config.experiment_enabled and not app_config.hardcoded:
@@ -41,10 +47,12 @@ def initial():
 
 @app.route('/index')
 def index():
+    '''Returns rendered template'''
     return render_template('index.html',
                            debounce_time=app_config.debounce_time,
                            min_sentences=app_config.min_sentences,
-                           stuck_prompts=app_config.stuck_prompts)
+                           stuck_prompts=app_config.stuck_prompts,
+                           predicted_event=session['predicted_event'])
 
 
 @app.route('/autocomplete', methods=['GET', 'POST'])
@@ -66,7 +74,7 @@ def autocomplete():
                             context=context, incomplete_sentence=incomplete_sentence,
                             temperature=temperature,
                             frequency_penalty=app_config.frequency_penalty,
-                            max_tokens=random.randint(*app_config.token_range), top_p=app_config.top_p))
+                            max_tokens=random.randint(*app_config.token_range)))
     completion_no_prompt = remove_prompt_words(completion)
     full_word_completion = normalize_spacing(extract_complete_words(completion_no_prompt))
     de_duped_completion = normalize_spacing(remove_duplicated_completion(incomplete_sentence, full_word_completion))
@@ -81,23 +89,38 @@ def autocomplete():
 # HANDLE CHARACTER AND EVENT CREATION
 ############################################################
 @app.route('/user_settings', methods=['GET', 'POST'])
+@app.route('/user_settings', methods=['GET', 'POST'])
 def user_settings():
     character_form = CharacterForm()
     event_form = EventForm()
+
     if request.method == 'POST':
         if character_form.validate_on_submit() and event_form.validate_on_submit():
             flash('Character and event created successfully!', 'success')
-            session['character_description'] = construct_character_description(character_form)
-            session['event_name'] = event_form.event.data
-            session['event_description'] = get_dynamic_effects(session['character_description'], session['event_name'])
-            #session['event_description] =  get_dynamic_effects(app_config['experiment_event])
+            character_description = construct_character_description(character_form)
+            event_name = event_form.event.data
+
+            session['character_description'] = character_description
+            session['event_name'] = event_name
+
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                future_dynamic_effects = executor.submit(get_dynamic_effects, character_description, event_name)
+                future_predicted_event = executor.submit(get_predicted_event, character_description, event_name)
+
+                event_description = future_dynamic_effects.result()
+                predicted_event = future_predicted_event.result()
+
+            session['event_description'] = event_description
+            session['predicted_event'] = predicted_event
+
             return redirect(url_for('index'))
         else:
             flash('Please correct the errors in the form.', 'error')
-    elif request.method == 'GET':
-        return render_template('user_settings.html', character_form=character_form, event_form=event_form)
-    
-    
+
+    return render_template('user_settings.html', character_form=character_form, event_form=event_form)
+
+
+
 @app.route('/user_settings_experiment', methods=['GET', 'POST'])
 def user_settings_experiment():
     character_form = CharacterForm()
@@ -106,7 +129,8 @@ def user_settings_experiment():
             flash('Character created successfully!', 'success')
             session['character_description'] = construct_character_description(character_form)
             session['event_name'] = app_config.event['name']
-            session['event_description'] =  get_dynamic_effects(session['character_description'], app_config.event['name'])
+            session['event_description'] = get_dynamic_effects(session['character_description'],
+                                                               app_config.event['name'])
             return redirect(url_for('index'))
         else:
             flash('Please correct the errors in the form.', 'error')
@@ -114,7 +138,29 @@ def user_settings_experiment():
         return render_template('user_settings_experiment.html', character_form=character_form)
 
 
-def get_dynamic_effects(character_description, event_description, attempt_no=0, max_attempts=2):
+def get_predicted_event(character_description, event_name):
+    client = app_config.client
+    response = client.chat.completions.create(
+        model=app_config.effects_generator_model,
+        messages=[
+            {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
+            {"role": "user", "content": (
+                f"INSTRUCTIONS\n"
+                f"Given a description of a person, return a realistic scenario that would cause this person to experience {event_name}. Rely ONLY on what is in the description."
+                f"Be very specific and very realistic. Do not exaggerate. Write 20-30 words. DO NOT write about the effect of this event, but only focus on the scenario and how "
+                f"that would make them experience {event_name}. Return one such event. Write in second person.\n"
+                f"DESCRIPTION:\n"
+                f"{character_description}"
+            )}
+        ],
+        temperature=0.6,
+        max_tokens=1000,
+        top_p=1
+    )
+    return json.loads(response.choices[0].json())['message']['content']
+
+
+def get_dynamic_effects(character_description, event_name, attempt_no=0, max_attempts=2):
     if attempt_no > max_attempts:
         return None
     else:
@@ -123,7 +169,7 @@ def get_dynamic_effects(character_description, event_description, attempt_no=0, 
             response = client.chat.completions.create(model=app_config.effects_generator_model, messages=[
                 {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
                 {"role": "user",
-                 "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {event_description} on this person. 
+                 "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {event_name} on this person. 
                      Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be concrete, realistic and specific. Do not exaggerate. Write 100 words.
                     DESCRIPTION:
                     {character_description}"""}], temperature=0.6, max_tokens=1000, top_p=1)
@@ -131,18 +177,18 @@ def get_dynamic_effects(character_description, event_description, attempt_no=0, 
             return answer
         except Exception as e:
             print(e)
-            return get_dynamic_effects(character_description, event_description, attempt_no + 1, max_attempts)
+            return get_dynamic_effects(character_description, event_name, attempt_no + 1, max_attempts)
 
 
 def construct_character_description(form):
-    return f"I am {form.age.data} years old from {form.location.data}, working as a {form.occupation.data}. My hobbies include {form.hobbies.data}. My friends describe me as {form.personality.data}."
+    return f"I am {form.age.data} years old from {form.location.data}, working as a {form.occupation.data}. My hobbies include {form.hobbies.data}. Here is how I describe myself: '''{form.personality.data}'''"
 
 
 ############################################################
 # FUNCTIONS FOR PROCESSING TEXT
 ############################################################
 def get_chat_completion(character_description, event, event_effects, context, incomplete_sentence, model, temperature,
-                        max_tokens, top_p, include_event, frequency_penalty=0, attempt_no=0, max_attempts=1):
+                        max_tokens, include_event, frequency_penalty=0, attempt_no=0, max_attempts=1):
     if attempt_no > max_attempts:
         return None
     else:
@@ -153,18 +199,19 @@ def get_chat_completion(character_description, event, event_effects, context, in
             else:
                 system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence as if you were the CHARACTER.\n\nCHARACTER\n{character_description}\n\nCONSTRAINTS{app_config.non_event_constraints}"
             response = completion(model=model,
-                                                      messages=[{"role": "system", "content": system_instructions},
-                                                                {"role": "user",
-                                                                 "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"}],
-                                                      temperature=temperature, max_tokens=max_tokens, top_p=top_p)
+                                  messages=[{"role": "system", "content": system_instructions},
+                                            {"role": "user",
+                                             "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"}],
+                                  temperature=temperature, max_tokens=max_tokens)
             print(system_instructions)
             print(f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}")
 
-            answer = json.loads(response.choices[0].model_dump_json())['message']['content']            
+            answer = json.loads(response.choices[0].model_dump_json())['message']['content']
             return answer
         except Exception as e:
             return get_chat_completion(context=context, incomplete_sentence=incomplete_sentence, model=model,
-                                       temperature=temperature, max_tokens=max_tokens, top_p=top_p,frequency_penalty=frequency_penalty,
+                                       temperature=temperature, max_tokens=max_tokens,
+                                       frequency_penalty=frequency_penalty,
                                        include_event=include_event, attempt_no=attempt_no + 1, max_attempts=2)
 
 
@@ -176,7 +223,12 @@ def remove_duplicated_completion(incomplete_sentence, completion):
     completion = completion.strip()
 
     # Case 1: Direct overlap
+
+    # Case 1a (same case):
     if completion.startswith(incomplete_sentence):
+        return completion[len(incomplete_sentence):].lstrip()
+    # Case 1b (different case):
+    elif completion.lower().startswith(incomplete_sentence.lower()):
         return completion[len(incomplete_sentence):].lstrip()
 
     # Case 2: Completion is a subset of incomplete
