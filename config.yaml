@@ -18,8 +18,8 @@ app_is_offline: false
 
 llm:
     model: "gpt-4o"
-    temperature_min: 1.0
-    temperature_max: 1.8
+    temperature_min: 0.5
+    temperature_max: 1.5
     max_tokens_min: 10
     max_tokens_max: 30
     max_attempts: 2
@@ -44,7 +44,7 @@ autocomplete:
         - "Use clear, plain, simple language that a very simple and plain person would use."
         - "Everything you write should be about CONCRETE things and actions, not feelings and emotions. Be CONCRETE and not ABSTRACT."
         - "Be very concrete."
-        - "DO NOT include ANYTHING beside the added tokens to the INCOMPLETE SENTENCE in your output. DO NOT INCLUDE THE CONTEXT IN YOUR OUPUT"
+        - "Do not include the incomplete sentence or what was previously written in your response."
         - "Write like Ernest Hemingway."
 
 ####################################
