@@ -1,187 +1,209 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Text Editor with Autocomplete</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="{{ url_for('static', filename='styles/index.css') }}" rel="stylesheet" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.19/lodash.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body>
-    <input type="hidden" id="debounce_time" value="{{ debounce_time }}" />
-    <input type="hidden" id="min_sentences" value="{{ min_sentences }}" />
-    <div class="editor-container">
-        <p><b>Imagine this is how it started: </b>{{predicted_event}}</p>
-        <div contenteditable="true" data-placeholder="Start typing about a day in your life. Then an AI will autocomplete your thoughts. Press tab to accept suggestions or any key to reject them. Some ways to start: 'I woke up and had breakfast. Then I went to work.'" id="editor" class="form-control"></div>
-        <div class="button-row">
-            <button type="button" class="btn btn-primary copy-button" onclick="copyText()"><i class="fa fa-share"></i> Share Story</button>
-            <button type="button" class="btn btn-primary stuck-button" onclick="showRandomPrompt()"><i class="fa fa-question-circle"></i> Help. I'm stuck!</button>
-            <button type="button" class="btn btn-primary home-button" onclick="returnToHome()"><i class="fa fa-home"></i> Return to Home</button>
-        </div>
-    </div>
-    <div class="timer-container">
-        <span id="timer">05:00</span>
-    </div>
-    <div class="modal" id="promptModal" tabindex="-1" role="dialog" aria-labelledby="promptModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="promptModalLabel">Random Prompt</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Okay">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body"></div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-        var debounce_time = parseInt(document.getElementById('debounce_time').value);
-        var min_sentences = parseInt(document.getElementById('min_sentences').value);
-        var prompts = {{ stuck_prompts | tojson | safe }};
+	<head>
+		<title>Text Editor with Autocomplete</title>
+		<link
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+			rel="stylesheet"
+		/>
 
-        function returnToHome() {
-            window.location.href = '/';
-        }
+		<link
+			href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+			rel="stylesheet"
+		/>
+		<link href="{{ url_for('static', filename='styles/index.css') }}" rel="stylesheet" />
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.19/lodash.min.js"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	</head>
+	
+	<body>
+		<input type="hidden" id="debounce_time" value="{{ debounce_time }}" />
+		<input type="hidden" id="min_sentences" value="{{ min_sentences }}" />
 
-        function copyText() {
-            var textToCopy = "Here's a story I made with https://autocomplete-production.up.railway.app!\n\n" + document.getElementById('editor').innerText;
-            navigator.clipboard.writeText(textToCopy).then(function () {
-                Swal.fire({
-                    title: 'Nice!',
-                    text: 'Story copied to clipboard.',
-                    icon: 'success',
-                    confirmButtonText: 'Ok'
-                });
-            }).catch(function (error) {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Could not copy the story.',
-                    icon: 'error',
-                    confirmButtonText: 'Ok'
-                });
-            });
-        }
+		
+		<div class="editor-container">
+			<p>
+				<b>Imagine this is how it started: </b>{{predicted_event}}
+			</p>
+			<div
+				contenteditable="true"
+				data-placeholder="Start typing about a day in your life. Then an AI will autocomplete your thoughts. Press tab to accept suggestions or any key to reject them. Some ways to start: 'I woke up and had breakfast. Then I went to work.'"
+				id="editor"
+				class="form-control"
+			></div>
 
-        function showRandomPrompt() {
-            var randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-            $('#promptModal .modal-body').text(randomPrompt);
-            $('#promptModal').modal('show');
-        }
+			<!-- Combined button row -->
+			<div class="button-row">
+				<!-- Share Story Button -->
+				<button type="button" class="btn btn-primary copy-button" onclick="copyText()">
+					<i class="fa fa-share"></i> Share Story
+				</button>
+				<!-- Help. I'm stuck! Button -->
+				<button type="button" class="btn btn-primary stuck-button" onclick="showRandomPrompt()">
+					<i class="fa fa-question-circle"></i> Help. I'm stuck!
+				</button>
 
-        function startTimer(duration, display) {
-            var timer = duration, minutes, seconds;
-            var timerInterval = setInterval(function () {
-                minutes = parseInt(timer / 60, 10);
-                seconds = parseInt(timer % 60, 10);
+				<!-- Return to home Button 
+				Data will be saved to database in returnToHome function -->
+				<button type="button" class="btn btn-primary home-button" onclick="returnToHome()">
+					<i class="fa fa-home"></i> Return to Home
+				</button>
+			</div>
+		</div>
 
-                minutes = minutes < 10 ? "0" + minutes : minutes;
-                seconds = seconds < 10 ? "0" + seconds : seconds;
+		<!-- Bootstrap Modal -->
+		<div
+			class="modal"
+			id="promptModal"
+			tabindex="-1"
+			role="dialog"
+			aria-labelledby="promptModalLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="promptModalLabel">Random Prompt</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Okay">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<!-- The random prompt will be displayed here -->
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			var debounce_time = parseInt(document.getElementById('debounce_time').value);
+			var min_sentences = parseInt(document.getElementById('min_sentences').value);
+			var prompts = {{ stuck_prompts | tojson | safe }};
 
-                display.text(minutes + ":" + seconds);
+			function returnToHome() {
+			 	window.location.href = '/';
+			}
 
-                if (--timer < 0) {
-                    clearInterval(timerInterval);
-                    alert("Time is up!");
-                }
-            }, 1000);
-        }
+			function copyText() {
+			    var textToCopy = "Here's a story I made with https://autocomplete-production.up.railway.app!\n\n" + document.getElementById('editor').innerText;
 
-        $(document).ready(function () {
-            var editor = $('#editor');
-            var originalText = '';
-            var suggestion = '';
-            var suggestionAccepted = false;
-            var last_updated = 0;
 
-            $(function () {
-                var timerDisplay = $('#timer');
-                startTimer(5 * 60, timerDisplay); // 5 minutes in seconds
-            });
+			    navigator.clipboard.writeText(textToCopy).then(function () {
+			        Swal.fire({
+			            title: 'Nice!',
+			            text: 'Story copied to clipboard.',
+			            icon: 'success',
+			            confirmButtonText: 'Ok'
+			        });
+			    }).catch(function (error) {
+			        Swal.fire({
+			            title: 'Error!',
+			            text: 'Could not copy the story.',
+			            icon: 'error',
+			            confirmButtonText: 'Ok'
+			        });
+			    });
+			}
 
-            function isMiddleOfSentence(text) {
-                return !/[\.\?\!\:\;]\s$/.test(text);
-            }
+			function showRandomPrompt() {
+			    var randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+			    $('#promptModal .modal-body').text(randomPrompt); // Set the text of the modal body
+			    $('#promptModal').modal('show'); // Display the modal
+			}
 
-            function countSentences(text) {
-                return (text.match(/[.!?]/g) || []).length;
-            }
+			$(document).ready(function () {
+			    var editor = $('#editor');
+			    var originalText = '';
+			    var suggestion = '';
+			    var suggestionAccepted = false;
 
-            var debouncedAutocomplete = _.debounce(function () {
-                if (isMiddleOfSentence(originalText) && countSentences(originalText) >= min_sentences) {
-                    triggerAutocomplete();
-                }
-            }, debounce_time);
+			    var last_updated = 0;
 
-            function updateEditorText() {
-                editor.text(originalText);
-                if (suggestion && suggestion !== 'None') {
-                    var suggestionElement = $('<span>').addClass('suggestion').text(suggestion);
-                    editor.append(suggestionElement);
-                }
-                placeCaretAtEnd(editor.get(0));
-            }
 
-            editor.on('input', function () {
-                originalText = $(this).text();
-                console.log(originalText);
-                if (originalText.trim().length - last_updated > 5) {
-                    debouncedAutocomplete();
-                }
-            });
+			    function isMiddleOfSentence(text) {
+			        return !/[\.\?\!\:\;]\s$/.test(text);
+			    }
 
-            function triggerAutocomplete() {
-                $.ajax({
-                    url: '/autocomplete',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ text: originalText }),
-                    success: function (response) {
-                        suggestion = response.completion || '';
-                        updateEditorText();
-                        suggestionAccepted = false;
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Autocomplete error:", status, error);
-                        suggestion = '';
-                        updateEditorText();
-                    }
-                });
-            }
+			    function countSentences(text) {
+			        return (text.match(/[.!?]/g) || []).length;
+			    }
 
-            editor.on('keydown', function (e) {
-                if (e.keyCode === 9 && suggestion) {  // Tab key
-                    e.preventDefault();
-                    if (!/\s/.test(originalText[originalText.length - 1]) && !/[!.,;?:]/.test(suggestion[0])) {
-                        originalText += ' ';
-                    }
-                    originalText += suggestion;
-                    last_updated = originalText.length;
-                    suggestion = '';
-                    updateEditorText();
-                    suggestionAccepted = true;
-                } else if (!suggestionAccepted) {
-                    suggestion = '';
-                    updateEditorText();
-                }
-            });
+			    var debouncedAutocomplete = _.debounce(function () {
+			        if (isMiddleOfSentence(originalText) && countSentences(originalText) >= min_sentences ) {
+			            triggerAutocomplete();
+			        }
+			    }, debounce_time);
 
-            function placeCaretAtEnd(el) {
-                el.focus();
-                var range = document.createRange();
-                range.selectNodeContents(el);
-                range.collapse(false);
-                var sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
-        });
-    </script>
-</body>
+			    function updateEditorText() {
+			        editor.text(originalText);
+			        if (suggestion && suggestion !== 'None') {
+			            var suggestionElement = $('<span>').addClass('suggestion').text(suggestion);
+			            editor.append(suggestionElement);
+			        }
+			        placeCaretAtEnd(editor.get(0));
+			    }
+
+			    editor.on('input', function () {
+			        originalText = $(this).text();
+			        console.log(originalText);
+			        if (originalText.trim().length - last_updated > 5){
+			            debouncedAutocomplete();
+			        }
+
+			    });
+
+			    function triggerAutocomplete() {
+			        $.ajax({
+			            url: '/autocomplete',
+			            type: 'POST',
+			            contentType: 'application/json',
+			            data: JSON.stringify({text: originalText}),
+			            success: function (response) {
+			                suggestion = response.completion || '';
+			                updateEditorText();
+			                suggestionAccepted = false;
+			            },
+			            error: function (xhr, status, error) {
+			                console.error("Autocomplete error:", status, error);
+			                suggestion = ''; // Clear suggestion on error
+			                updateEditorText();
+			            }
+			        });
+			    }
+
+			    editor.on('keydown', function (e) {
+			        if (e.keyCode === 9 && suggestion) {  // Tab key
+			            e.preventDefault();
+			            // console.log(originalText[originalText.length-1]);
+			            if (!/\s/.test(originalText[originalText.length-1]) && !/[!.,;?:]/.test(suggestion[0])) {
+			 				console.log("Last character is not a space and first character of suggestion is not a punctuation");
+			 				originalText += ' ';
+						}
+			            originalText += suggestion;
+			            last_updated = originalText.length;
+			            suggestion = '';
+			            updateEditorText();
+			            suggestionAccepted = true;
+			        } else if (!suggestionAccepted) {
+			            suggestion = ''; // Clear suggestion on other key presses
+			            updateEditorText();
+			        }
+			    });
+
+			    function placeCaretAtEnd(el) {
+			        el.focus();
+			        var range = document.createRange();
+			        range.selectNodeContents(el);
+			        range.collapse(false);
+			        var sel = window.getSelection();
+			        sel.removeAllRanges();
+			        sel.addRange(range);
+			    }
+			});
+		</script>
+	</body>
 </html>
