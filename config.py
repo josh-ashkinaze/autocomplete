@@ -4,6 +4,7 @@ from openai import OpenAI
 import os
 import secrets
 from litellm import completion
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class AppConfig:
     def __init__(self, config_file='config.yaml'):
@@ -59,8 +60,21 @@ class AppConfig:
             self.event = self.config['event']
             self.character = self.config['characters']['p1']
             self.character_description = self.construct_character_description()
-            self.event_description = self.get_dynamic_effects()
+
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                future_dynamic_effects = executor.submit(self.get_dynamic_effects)
+                future_predicted_event = executor.submit(self.get_predicted_event)
+                event_description = future_dynamic_effects.result()
+                predicted_event = future_predicted_event.result()
+
+            self.event_description = event_description
+            self.predicted_event = predicted_event
+
             print(self.event_description)
+            print(self.predicted_event)
+
+
+
         elif self.experiment_enabled:
             self.event = self.config['event']
             self.event_description = self.get_dynamic_effects()
@@ -95,12 +109,7 @@ class AppConfig:
 
     def construct_character_description(self):
         char_info = self.character
-        description = (
-            f"I am {char_info['age']} years old, from {char_info['location']}. "
-            f"I work as a {char_info['occupation']}. "
-            f"My hobbies include {' and '.join(char_info['hobbies'])}. "
-            f"People describe me as {char_info['personality']}.")
-        return description
+        return f"I am {char_info['age']} years old from {char_info['location']}, working as a {char_info['occupation']}. My hobbies include {char_info['hobbies']}. Here is how I describe myself: '''{char_info['personality']}'''"
 
     def get_dynamic_effects(self, attempt_no=0, max_attempts=2):
         if attempt_no > max_attempts:
@@ -108,19 +117,36 @@ class AppConfig:
         else:
             try:
                 client = self.client
-                response = client.chat.completions.create(model=self.effects_generator_model,
-                                                          messages=[
-                                                              {"role": "system",
-                                                               "content": "You are a helpful, factual, and highly specific assistant."},
-                                                              {"role": "user",
-                                                               "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {self.event['name'].lower()} on this person. 
-                         Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be realistic, specific, and concrete. Be concrete. Answer in 100 words.
+                response = client.chat.completions.create(model=self.effects_generator_model, messages=[
+                    {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
+                    {"role": "user",
+                     "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {self.event} on this person. 
+                         Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be concrete, realistic and specific. Do not exaggerate. Write 100 words.
                         DESCRIPTION:
-                        {self.character_description}"""}],
-                                                          temperature=0.8, max_tokens=200, top_p=1)
+                        {self.character_description}"""}], temperature=0.6, max_tokens=1000, top_p=1)
                 answer = json.loads(response.choices[0].json())['message']['content']
                 return answer
             except Exception as e:
                 print(e)
-                # Corrected recursive call here
                 return self.get_dynamic_effects(attempt_no + 1, max_attempts)
+
+    def get_predicted_event(self):
+        client = self.client
+        response = client.chat.completions.create(
+            model=self.effects_generator_model,
+            messages=[
+                {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
+                {"role": "user", "content": (
+                    f"INSTRUCTIONS\n"
+                    f"Given a description of a person, return a realistic scenario that would cause this person to experience {self.event}. Rely ONLY on what is in the description."
+                    f"Be very specific and very realistic. Do not exaggerate. Write 20-30 words. DO NOT write about the effect of this event, but only focus on the scenario and how "
+                    f"that would make them experience {self.event}. Return one such event. Write in second person.\n"
+                    f"DESCRIPTION:\n"
+                    f"{self.character_description}"
+                )}
+            ],
+            temperature=0.6,
+            max_tokens=1000,
+            top_p=1
+        )
+        return json.loads(response.choices[0].json())['message']['content']

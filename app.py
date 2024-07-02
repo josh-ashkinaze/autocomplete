@@ -42,6 +42,7 @@ def initial():
         session['character_description'] = app_config.character_description
         session['event_name'] = app_config.event['name']
         session['event_description'] = app_config.event_description
+        session['predicted_event'] = app_config.predicted_event
         return redirect(url_for('index'))
 
 
