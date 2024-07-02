@@ -11,6 +11,7 @@ import random
 import re
 import string
 from litellm import completion
+from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 
@@ -51,7 +52,7 @@ def index():
                            debounce_time=app_config.debounce_time,
                            min_sentences=app_config.min_sentences,
                            stuck_prompts=app_config.stuck_prompts,
-                           predicted_event = session['predicted_event'])
+                           predicted_event=session['predicted_event'])
 
 
 @app.route('/autocomplete', methods=['GET', 'POST'])
@@ -88,24 +89,42 @@ def autocomplete():
 # HANDLE CHARACTER AND EVENT CREATION
 ############################################################
 @app.route('/user_settings', methods=['GET', 'POST'])
+@app.route('/user_settings', methods=['GET', 'POST'])
 def user_settings():
     character_form = CharacterForm()
     event_form = EventForm()
+
     if request.method == 'POST':
         if character_form.validate_on_submit() and event_form.validate_on_submit():
             flash('Character and event created successfully!', 'success')
-            session['character_description'] = construct_character_description(character_form)
-            session['event_name'] = event_form.event.data
-            session['event_description'] = get_dynamic_effects(session['character_description'], session['event_name'])
-            get_predicted_event()
-            #session['event_description] =  get_dynamic_effects(app_config['experiment_event])
+            character_description = construct_character_description(character_form)
+            event_name = event_form.event.data
+
+            # Store the data in the session for future use
+            session['character_description'] = character_description
+            session['event_name'] = event_name
+
+            # Run tasks in parallel using concurrent.futures
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                future_dynamic_effects = executor.submit(get_dynamic_effects, character_description, event_name)
+                future_predicted_event = executor.submit(get_predicted_event, character_description, event_name)
+
+                # Wait for both futures to complete and get the results
+                event_description = future_dynamic_effects.result()
+                predicted_event = future_predicted_event.result()
+
+            # Store the results back in the session
+            session['event_description'] = event_description
+            session['predicted_event'] = predicted_event
+
             return redirect(url_for('index'))
         else:
             flash('Please correct the errors in the form.', 'error')
-    elif request.method == 'GET':
-        return render_template('user_settings.html', character_form=character_form, event_form=event_form)
-    
-    
+
+    return render_template('user_settings.html', character_form=character_form, event_form=event_form)
+
+
+
 @app.route('/user_settings_experiment', methods=['GET', 'POST'])
 def user_settings_experiment():
     character_form = CharacterForm()
@@ -114,25 +133,36 @@ def user_settings_experiment():
             flash('Character created successfully!', 'success')
             session['character_description'] = construct_character_description(character_form)
             session['event_name'] = app_config.event['name']
-            session['event_description'] =  get_dynamic_effects(session['character_description'], app_config.event['name'])
+            session['event_description'] = get_dynamic_effects(session['character_description'],
+                                                               app_config.event['name'])
             return redirect(url_for('index'))
         else:
             flash('Please correct the errors in the form.', 'error')
     elif request.method == 'GET':
         return render_template('user_settings_experiment.html', character_form=character_form)
 
-def get_predicted_event():
+
+def get_predicted_event(character_description, event_name):
     client = app_config.client
-    response = client.chat.completions.create(model=app_config.effects_generator_model, messages=[
-        {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
-        {"role": "user",
-            "content": f"""INSTRUCTIONS\nGiven a description of a person, return a realistic scenario that would cause this person to experience {session['event_description']}. 
-                Be very specific and very realistic. Do not exaggerate. Write 20-30 words. DO NOT write about the effect of this event, but only focus on the scenario and how 
-                that would make them experience {session['event_description']}. Return one such event. Write in second person.
-            DESCRIPTION:
-            {session['character_description']}"""}], temperature=0.6, max_tokens=1000, top_p=1)
-    
-    session['predicted_event'] = json.loads(response.choices[0].json())['message']['content']
+    response = client.chat.completions.create(
+        model=app_config.effects_generator_model,
+        messages=[
+            {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
+            {"role": "user", "content": (
+                f"INSTRUCTIONS\n"
+                f"Given a description of a person, return a realistic scenario that would cause this person to experience {event_name}. "
+                f"Be very specific and very realistic. Do not exaggerate. Write 20-30 words. DO NOT write about the effect of this event, but only focus on the scenario and how "
+                f"that would make them experience {character_description}. Return one such event. Write in second person.\n"
+                f"DESCRIPTION:\n"
+                f"{event_name}"
+            )}
+        ],
+        temperature=0.6,
+        max_tokens=1000,
+        top_p=1
+    )
+    return json.loads(response.choices[0].json())['message']['content']
+
 
 def get_dynamic_effects(character_description, event_description, attempt_no=0, max_attempts=2):
     if attempt_no > max_attempts:
@@ -173,18 +203,19 @@ def get_chat_completion(character_description, event, event_effects, context, in
             else:
                 system_instructions = f"INSTRUCTIONS\nA character is describing a day in their life. Finish a sentence as if you were the CHARACTER.\n\nCHARACTER\n{character_description}\n\nCONSTRAINTS{app_config.non_event_constraints}"
             response = completion(model=model,
-                                                      messages=[{"role": "system", "content": system_instructions},
-                                                                {"role": "user",
-                                                                 "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"}],
-                                                      temperature=temperature, max_tokens=max_tokens)
+                                  messages=[{"role": "system", "content": system_instructions},
+                                            {"role": "user",
+                                             "content": f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}"}],
+                                  temperature=temperature, max_tokens=max_tokens)
             print(system_instructions)
             print(f"CONTEXT:{context}\n\nINCOMPLETE SENTENCE:{incomplete_sentence}")
 
-            answer = json.loads(response.choices[0].model_dump_json())['message']['content']            
+            answer = json.loads(response.choices[0].model_dump_json())['message']['content']
             return answer
         except Exception as e:
             return get_chat_completion(context=context, incomplete_sentence=incomplete_sentence, model=model,
-                                       temperature=temperature, max_tokens=max_tokens,frequency_penalty=frequency_penalty,
+                                       temperature=temperature, max_tokens=max_tokens,
+                                       frequency_penalty=frequency_penalty,
                                        include_event=include_event, attempt_no=attempt_no + 1, max_attempts=2)
 
 
