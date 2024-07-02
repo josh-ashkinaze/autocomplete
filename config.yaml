@@ -40,11 +40,11 @@ autocomplete:
     # Instructions for completions
     constraints:
         - "Given the CONTEXT of what was written, finish the INCOMPLETE SENTENCE as the character."
-        - "SHOW, do not TELL, how {event} event would affect the person. Describe surroundings and actions very specifically."
+        - "SHOW, do not TELL, how  the {EVENT} would affect the person. Describe surroundings and actions very specifically."
         - "Use clear, plain, simple language that a very simple and plain person would use."
         - "Everything you write should be about CONCRETE things and actions, not feelings and emotions. Be CONCRETE and not ABSTRACT."
         - "Be very concrete."
-        - "Do not include the incomplete sentence or what was previously written in your response."
+        - "Do not include the incomplete sentence in your response."
         - "Write like Ernest Hemingway."
 
 ####################################
