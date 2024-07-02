@@ -100,20 +100,16 @@ def user_settings():
             character_description = construct_character_description(character_form)
             event_name = event_form.event.data
 
-            # Store the data in the session for future use
             session['character_description'] = character_description
             session['event_name'] = event_name
 
-            # Run tasks in parallel using concurrent.futures
             with ThreadPoolExecutor(max_workers=2) as executor:
                 future_dynamic_effects = executor.submit(get_dynamic_effects, character_description, event_name)
                 future_predicted_event = executor.submit(get_predicted_event, character_description, event_name)
 
-                # Wait for both futures to complete and get the results
                 event_description = future_dynamic_effects.result()
                 predicted_event = future_predicted_event.result()
 
-            # Store the results back in the session
             session['event_description'] = event_description
             session['predicted_event'] = predicted_event
 
@@ -150,7 +146,7 @@ def get_predicted_event(character_description, event_name):
             {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
             {"role": "user", "content": (
                 f"INSTRUCTIONS\n"
-                f"Given a description of a person, return a realistic scenario that would cause this person to experience {event_name}. "
+                f"Given a description of a person, return a realistic scenario that would cause this person to experience {event_name}. Rely ONLY on what is in the description."
                 f"Be very specific and very realistic. Do not exaggerate. Write 20-30 words. DO NOT write about the effect of this event, but only focus on the scenario and how "
                 f"that would make them experience {event_name}. Return one such event. Write in second person.\n"
                 f"DESCRIPTION:\n"
@@ -164,7 +160,7 @@ def get_predicted_event(character_description, event_name):
     return json.loads(response.choices[0].json())['message']['content']
 
 
-def get_dynamic_effects(character_description, event_description, attempt_no=0, max_attempts=2):
+def get_dynamic_effects(character_description, event_name, attempt_no=0, max_attempts=2):
     if attempt_no > max_attempts:
         return None
     else:
@@ -173,7 +169,7 @@ def get_dynamic_effects(character_description, event_description, attempt_no=0, 
             response = client.chat.completions.create(model=app_config.effects_generator_model, messages=[
                 {"role": "system", "content": "You are a helpful, factual, and highly specific assistant."},
                 {"role": "user",
-                 "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {event_description} on this person. 
+                 "content": f"""INSTRUCTIONS\nGiven a description of a person, return an enumerated list of the likely effects of {event_name} on this person. 
                      Be very specific and very realistic. The effects can be related to any aspect of the person (their personality, demographics, hobbies, location etc.) but the effects must be concrete, realistic and specific. Do not exaggerate. Write 100 words.
                     DESCRIPTION:
                     {character_description}"""}], temperature=0.6, max_tokens=1000, top_p=1)
@@ -181,11 +177,11 @@ def get_dynamic_effects(character_description, event_description, attempt_no=0, 
             return answer
         except Exception as e:
             print(e)
-            return get_dynamic_effects(character_description, event_description, attempt_no + 1, max_attempts)
+            return get_dynamic_effects(character_description, event_name, attempt_no + 1, max_attempts)
 
 
 def construct_character_description(form):
-    return f"I am {form.age.data} years old from {form.location.data}, working as a {form.occupation.data}. My hobbies include {form.hobbies.data}. My friends describe me as {form.personality.data}."
+    return f"I am {form.age.data} years old from {form.location.data}, working as a {form.occupation.data}. My hobbies include {form.hobbies.data}. Here is how I describe myself: '''{form.personality.data}'''"
 
 
 ############################################################
